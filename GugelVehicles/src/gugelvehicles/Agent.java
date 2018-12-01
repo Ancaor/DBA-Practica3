@@ -51,7 +51,7 @@ public class Agent extends SuperAgent{
      * @param sendTo nombre del agente que recibirá el mensaje.
      * @param content contenido del mensaje.
      */
-    public void sendMessage(AgentID sendTo, String content,int performative, String conversation_id, String inReplyTo){
+    public void sendMessage(AgentID sendTo, String content,int performative, String conversation_id, String inReplyTo, String replyWith){
         ACLMessage outbox = new ACLMessage();
 		
         outbox.setSender(this.getAid());
@@ -60,6 +60,7 @@ public class Agent extends SuperAgent{
         outbox.setPerformative(performative);
         outbox.setConversationId(conversation_id);
         outbox.setInReplyTo(inReplyTo);
+        outbox.setReplyWith(replyWith);
 		
         this.send(outbox);
     }
@@ -77,10 +78,11 @@ public class Agent extends SuperAgent{
             ArrayList<String> message = new ArrayList<>();
             ACLMessage inbox = this.receiveACLMessage();
             
-            message.add(inbox.getPerformative());
-            message.add(inbox.getConversationId());
-            message.add(inbox.getReplyWith());
-            message.add(inbox.getContent());
+            message.add(inbox.getPerformative()); //0
+            message.add(inbox.getConversationId()); //1
+            message.add(inbox.getReplyWith()); //2
+            message.add(inbox.getContent()); //3
+            message.add(inbox.getInReplyTo());//4
             
             return message;
             
