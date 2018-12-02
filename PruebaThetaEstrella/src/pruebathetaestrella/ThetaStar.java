@@ -20,7 +20,7 @@ public class ThetaStar {
     private ArrayList<Integer> map_real = new ArrayList<>();
     private final int width;
     private PriorityQueue<Node> openList;
-    private HashSet<Node> closedList;
+    private ArrayList<Node> closedList;
     
         public ThetaStar(int width, ArrayList<Integer> map) {
         this.width = width;
@@ -34,18 +34,21 @@ public class ThetaStar {
         
         Comparator<Node> comparator = new ComparatorNode();
         openList = new PriorityQueue<Node>(comparator);
-        closedList = new HashSet<Node>();
+        closedList = new ArrayList<Node>();
         Node currentNode = new Node(start, null);
         currentNode.parent = currentNode;
         currentNode.calculateValues(goal);
         openList.add(currentNode);
         
         while(!openList.isEmpty()){
+           // System.out.println("SIZE ANTES DE POLL: " + openList.size());
             currentNode = openList.poll();
+           // System.out.println("SIZE DESPUES DE POLL: " + openList.size());
             if(currentNode.point.equals(goal)){
                 return reconstructPath(currentNode);
             }
             closedList.add(currentNode);
+
               
                 for (int i = 0; i < 8; i++) {   //Recorrer 8 direcciones en sentido horario empezando por el norte
                 
@@ -86,13 +89,15 @@ public class ThetaStar {
                     if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1)){
                        Node adjNode = new Node(adjPoint,currentNode);
                        adjNode.calculateValues(goal);
-                                            
+                 //      System.out.println("ENTRA EN IF: " + this.map_real.get(adjPoint.y * this.width + adjPoint.x));
+                //       System.out.println("COORDENADAS: "+ adjNode.point.toString());
                        if(!closedList.contains(adjNode)){                          
                            if (!openList.contains(adjNode)){
                                adjNode.gValue = 99999999;
                                adjNode.parent = null;
+                              
                            }
-                           updateVertex(currentNode, adjNode);
+                            updateVertex(currentNode, adjNode);
                        }
                     }
                 }
@@ -112,6 +117,7 @@ public class ThetaStar {
             }
             neighbor.calculateValues(neighbor.point);
             openList.add(neighbor);
+      //      System.out.println("Nodo añadido: " + neighbor.point.toString());
         }
     }   
     
@@ -124,6 +130,7 @@ public class ThetaStar {
     }
     
     public ArrayList<MapPoint> reconstructPath(Node destinationNode){
+    //    System.out.println("Entra en reconstruct Path----------");
         ArrayList<MapPoint> path = new ArrayList<MapPoint>();
         Node node = destinationNode;
         while (node.parent != node) {

@@ -17,7 +17,7 @@ import java.util.Scanner;
  * @author Ruben
  */
 public class PruebaThetaEstrella {
-    private static int vision = 1;
+    private static int vision = 2;
     private static int x_actual = 1;
     private static int y_actual = 1;
     private static boolean encontradoObjetivo = false;
@@ -30,7 +30,7 @@ public class PruebaThetaEstrella {
     private static int x_objetivo;
     private static int y_objetivo;
     private static final String MAPA = "mapprueba";
-    private static ArrayList<Integer> map = new ArrayList<>();
+    private static ArrayList<Integer> map_visto = new ArrayList<>();
     private static ArrayList<Integer> map_real = new ArrayList<>();
     
     private static ArrayList<MapPoint> abiertos = new ArrayList<>();
@@ -38,6 +38,7 @@ public class PruebaThetaEstrella {
     
     public static void loadMap(String mapName){
         Scanner sc;
+        
         
         try {
             sc = new Scanner(new BufferedReader(new FileReader(mapName+".map")));
@@ -56,6 +57,12 @@ public class PruebaThetaEstrella {
                  }
               }
            }
+            
+            //Poner el mapa que ve a 1
+            for(int i = 0; i < m_real*m_real; i++){
+                map_visto.add(1);
+            }
+            
         } catch (FileNotFoundException ex) {
 
            // initMap(map);
@@ -78,6 +85,28 @@ public class PruebaThetaEstrella {
         map_aux.set(y_actual * m_real + x_actual, 9);
                 
         
+        System.out.println("MAP REAL");
+        for(int i = 0; i < m_real; i++){
+            for(int j = 0; j < m_real; j++){
+                System.out.print(map_aux.get(i * m_real + j) + " ");
+            }
+            System.out.print("\n");
+        }
+        
+        map_aux = new ArrayList<>(map_visto);
+     
+        for(int i = 0; i < abiertos.size(); i++){
+            map_aux.set(abiertos.get(i).y * m_real + abiertos.get(i).x, 5);
+        }
+        
+        for(int i = 0; i < cerrados.size(); i++){
+            map_aux.set(cerrados.get(i).y * m_real + cerrados.get(i).x, 4);
+        }
+        
+        map_aux.set(y_actual * m_real + x_actual, 9);
+                
+        
+        System.out.println("MAP VISTO");
         for(int i = 0; i < m_real; i++){
             for(int j = 0; j < m_real; j++){
                 System.out.print(map_aux.get(i * m_real + j) + " ");
@@ -120,9 +149,34 @@ public class PruebaThetaEstrella {
             }
     }
     
+    public static MapPoint abiertoMasCercano(){
+   
+        MapPoint pMasCercano = abiertos.get(0);
+        MapPoint pActual = new MapPoint(x_actual, y_actual);
+        double distanciaMenor = distance(pMasCercano, pActual);
+        
+        for(int i = 1; i < abiertos.size(); i++){
+            if(distance(abiertos.get(i),pActual) < distanciaMenor){
+                distanciaMenor = distance(abiertos.get(i),pActual);
+                pMasCercano = abiertos.get(i);
+            }
+        }
+        
+        return pMasCercano;
+    }
+    
+    public static double distance(MapPoint p1, MapPoint p2){
+        int xValue = (p1.x-p2.x)*(p1.x-p2.x);
+        int yValue = (p1.y-p2.y)*(p1.y-p2.y);
+        return Math.sqrt(xValue+yValue);
+    } 
+    
     public static void receiveRadar(){
         for(int i = x_actual-vision; i <= x_actual+vision; i++){
             for(int j = y_actual-vision; j <= y_actual+vision; j++){
+                //Actualiza mapa
+                map_visto.set(j * m_real + i, map_real.get(j * m_real + i));
+                
                  MapPoint punto = new MapPoint(i,j);
                  if(map_real.get(j * m_real + i) == 2){
                      encontradoObjetivo = true;
@@ -165,9 +219,9 @@ public class PruebaThetaEstrella {
     public static void main(String[] args) {
         loadMap(MAPA);
         System.out.println("tamanio map_real: " + map_real.size());
-        ThetaStar z = new ThetaStar(m_real, map_real);
+        ThetaStar z = new ThetaStar(m_real, map_visto);
         x_actual = 5;
-        y_actual = 1;
+        y_actual = 2;
         
         receiveRadar();
         
@@ -175,13 +229,21 @@ public class PruebaThetaEstrella {
         System.out.println("Cerrados: " + cerrados.toString());
         System.out.println("Pruba indexOf (4,1): " + abiertos.indexOf(new MapPoint(4,1)));
      //   abiertos.remove(abiertos.remove(abiertos.indexOf(new MapPoint(4,1))));
-        MapPoint puntoObjetivo = abiertos.get(0);
         //De momento coge siempre el primero
         printMap();
         while(!encontradoObjetivo){
+            ArrayList<MapPoint> path = null;
+            MapPoint puntoObjetivo = null;
+            while(path == null){
+                puntoObjetivo = abiertoMasCercano();
+                z = new ThetaStar(m_real, map_visto);
+                path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
+                if(path == null){
+                    abiertos.remove(abiertos.indexOf(puntoObjetivo));
+                }
+            }
             System.out.println("\n-----Yendo al punto: " + puntoObjetivo.toString());
-            puntoObjetivo = abiertos.get(0);
-            ArrayList<MapPoint> path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
+            
             ArrayList<String> ordenes = z.convertToInstructions(path, new MapPoint(x_actual, y_actual));
             
             System.out.println("Size ordenes: " + ordenes.size());
