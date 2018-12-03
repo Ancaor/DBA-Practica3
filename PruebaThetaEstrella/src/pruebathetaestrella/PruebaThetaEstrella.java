@@ -5,12 +5,24 @@
  */
 package pruebathetaestrella;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -221,6 +233,38 @@ public class PruebaThetaEstrella {
         }
     }
     
+    public static void PrintMapImage(){
+        
+        byte [][] a = new byte[m_real][n_real];
+        for(int i = 0; i < m_real; i++)
+            for(int j = 0; j < n_real; j++){
+                if((map_visto.get(i*m_real+j) == 1) || ((map_visto.get(i*m_real+j) == -1)))
+                a[i][j] = 0;
+                else a[i][j] = 1;
+            }
+        
+        byte raw[] = new byte[m_real * n_real];
+        for (int i = 0; i < a.length; i++) {
+            System.arraycopy(a[i], 0, raw, i*m_real, n_real);
+        }
+
+        byte levels[] = new byte[]{0, -1};
+        BufferedImage image = new BufferedImage(m_real, n_real, 
+                BufferedImage.TYPE_BYTE_INDEXED,
+                new IndexColorModel(8, 2, levels, levels, levels));
+        DataBuffer buffer = new DataBufferByte(raw, raw.length);
+        SampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_BYTE, m_real, n_real, 1, m_real * 1, new int[]{0});
+        Raster raster = Raster.createRaster(sampleModel, buffer, null);
+        image.setData(raster);
+        try {
+            ImageIO.write(image, "png", new File("test_"+MAPA+"it"+num_iteraciones+".png"));
+        } catch (IOException ex) {
+          //  Logger.getLogger(AgentExplorer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+        
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -264,9 +308,11 @@ public class PruebaThetaEstrella {
                 System.out.println("PosActual- x:" + x_actual + " y:" + y_actual);
                 System.out.println("Abiertos: " + abiertos.toString());
                 System.out.println("Cerrados: " + cerrados.toString());
-                printMap();
+                //printMap();
+                PrintMapImage();
             }
         }
+        
         //ArrayList<MapPoint> path = null;
         
         //PRUEBAS SUPONIENDO QUE SE TIENE UNA VISION DE 3X3
