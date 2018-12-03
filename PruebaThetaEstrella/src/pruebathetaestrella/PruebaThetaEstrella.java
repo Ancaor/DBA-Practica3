@@ -18,6 +18,7 @@ import java.util.Scanner;
  */
 public class PruebaThetaEstrella {
     private static int vision = 3;
+    private static int num_iteraciones = 0;
     private static int x_actual = 1;
     private static int y_actual = 1;
     private static boolean encontradoObjetivo = false;
@@ -105,7 +106,7 @@ public class PruebaThetaEstrella {
         
         map_aux.set(y_actual * m_real + x_actual, 9);
                 
-        
+     /*   
         System.out.println("MAP VISTO");
         for(int i = 0; i < m_real; i++){
             for(int j = 0; j < m_real; j++){
@@ -113,9 +114,12 @@ public class PruebaThetaEstrella {
             }
             System.out.print("\n");
         }
+        */
     }
     
     public static void actuarOrden(String orden){
+        num_iteraciones++;
+        System.out.println("NUMITERACIONES: " + num_iteraciones);
             if(orden == "moveN"){
                 y_actual--;
             }
