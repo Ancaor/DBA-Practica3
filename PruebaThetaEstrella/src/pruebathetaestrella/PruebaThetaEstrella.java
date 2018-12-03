@@ -29,7 +29,7 @@ import javax.imageio.ImageIO;
  * @author Ruben
  */
 public class PruebaThetaEstrella {
-    private static int vision = 2;
+    private static int vision = 3;
     private static int num_iteraciones = 0;
     private static int x_actual = 1;
     private static int y_actual = 1;
@@ -42,12 +42,13 @@ public class PruebaThetaEstrella {
     
     private static int x_objetivo;
     private static int y_objetivo;
-    private static final String MAPA = "mapprueba";
+    private static final String MAPA = "map11";
     private static ArrayList<Integer> map_visto = new ArrayList<>();
     private static ArrayList<Integer> map_real = new ArrayList<>();
     
     private static ArrayList<MapPoint> abiertos = new ArrayList<>();
     private static ArrayList<MapPoint> cerrados = new ArrayList<>();
+    private static ArrayList<MapPoint> traza = new ArrayList<>();
     
     public static void loadMap(String mapName){
         Scanner sc;
@@ -131,6 +132,7 @@ public class PruebaThetaEstrella {
     
     public static void actuarOrden(String orden){
         num_iteraciones++;
+        traza.add(new MapPoint(x_actual, y_actual));
         System.out.println("NUMITERACIONES: " + num_iteraciones);
             if(orden == "moveN"){
                 y_actual--;
@@ -250,6 +252,7 @@ public class PruebaThetaEstrella {
     public static void PrintMapImage(){
         
         byte [][] a = new byte[m_real][n_real];
+        
         for(int i = 0; i < m_real; i++)
             for(int j = 0; j < n_real; j++){
                 if((map_visto.get(i*m_real+j) == 1) || ((map_visto.get(i*m_real+j) == -1)))
@@ -271,7 +274,7 @@ public class PruebaThetaEstrella {
         Raster raster = Raster.createRaster(sampleModel, buffer, null);
         image.setData(raster);
         try {
-            ImageIO.write(image, "png", new File("test_"+MAPA+"it"+num_iteraciones+".png"));
+            ImageIO.write(image, "png", new File("test_BN"+MAPA+"it"+num_iteraciones+".png"));
         } catch (IOException ex) {
           //  Logger.getLogger(AgentExplorer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -279,6 +282,102 @@ public class PruebaThetaEstrella {
         
     }
     
+    public static void DrawColor(){
+       //image dimension
+       int width = m_real;
+       int height = m_real;
+       //create buffered image object img
+       BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+       //file object
+       File f = null;
+       //create random image pixel by pixel
+       for(int y = 0; y < height; y++){
+           //Pintar mapa blanco y negro
+         for(int x = 0; x < width; x++){
+           int a = 255; //alpha
+           int r = 255;
+           int g = 255;
+           int b = 255;
+
+           int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+           img.setRGB(y, x, p);
+         }
+       }
+       
+              
+        for(int y = 0; y < height; y++){
+           //Pintar mapa de abiertos y cerrados
+            for(int x = 0; x < width; x++){
+
+                if(abiertos.contains(new MapPoint(y,x))){
+                 int a = 255; //alpha
+                 int r = 255;
+                 int g = 255;
+                 int b = 0;
+
+                 int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+                 img.setRGB(y, x, p);
+                }
+                
+            if(cerrados.contains(new MapPoint(y,x))){
+                 int a = 255; //alpha
+                 int r = 255;
+                 int g = 0;
+                 int b = 0;
+
+                 int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+                 img.setRGB(y, x, p);
+                }
+            
+                if((map_visto.get(x*m_real+y) == 1) || (map_visto.get(x*m_real+y) == 1)){
+                    int a = 255; //alpha
+                    int r = 0;
+                    int g = 0;
+                    int b = 0;
+
+                    int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+                    img.setRGB(y, x, p);
+                }
+            }
+        }
+       
+        for(int y = 0; y < height; y++){
+           //Pintar mapa traza
+         for(int x = 0; x < width; x++){
+           int a = 255; //alpha
+           int r = 0;
+           int g = 255;
+           int b = 0;
+           if(traza.contains(new MapPoint(y,x))){
+
+            int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+            img.setRGB(y, x, p);
+           }
+         }
+         
+         //pintar posicion acutal
+           int a = 255; //alpha
+           int r = 0;
+           int g = 0;
+           int b = 255;
+           int p = (a<<24) | (r<<16) | (g<<8) | b;
+           img.setRGB(x_actual, y_actual, p);
+       }
+       //write image
+       try{
+           ImageIO.write(img, "png", new File("test_COLOR"+MAPA+"it"+num_iteraciones+".png"));
+         //f = new File("C:\\Cuarto\\Output.png");
+       //  ImageIO.write(img, "png", f);
+       }catch(IOException e){
+         System.out.println("Error: " + e);
+       }
+    }//main() ends here
+
     /**
      * @param args the command line arguments
      */
@@ -286,7 +385,7 @@ public class PruebaThetaEstrella {
         loadMap(MAPA);
         System.out.println("tamanio map_real: " + map_real.size());
         ThetaStar z = new ThetaStar(m_real, map_visto);
-        x_actual = 5;
+        x_actual = 50;
         y_actual = 2;
         
         receiveRadar();
@@ -320,14 +419,17 @@ public class PruebaThetaEstrella {
                 receiveRadar();
                 System.out.println("\n\nOrden ejecutada: " + ordenes.get(i));
                 System.out.println("PosActual- x:" + x_actual + " y:" + y_actual);
-                System.out.println("Abiertos: " + abiertos.toString());
-                System.out.println("Cerrados: " + cerrados.toString());
-                printMap();
-                //PrintMapImage();
+     //           System.out.println("Abiertos: " + abiertos.toString());
+     //           System.out.println("Cerrados: " + cerrados.toString());
+              //  printMap();
+                  //      PrintMapImage();
+            
             }
         }
    
-         PrintMapImage();
+        DrawColor();
+        PrintMapImage();
+       //  PrintMapImage();
         
         //ArrayList<MapPoint> path = null;
         
