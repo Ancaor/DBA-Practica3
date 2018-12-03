@@ -17,7 +17,7 @@ import java.util.Scanner;
  * @author Ruben
  */
 public class PruebaThetaEstrella {
-    private static int vision = 2;
+    private static int vision = 3;
     private static int x_actual = 1;
     private static int y_actual = 1;
     private static boolean encontradoObjetivo = false;
@@ -29,7 +29,7 @@ public class PruebaThetaEstrella {
     
     private static int x_objetivo;
     private static int y_objetivo;
-    private static final String MAPA = "mapprueba";
+    private static final String MAPA = "map11";
     private static ArrayList<Integer> map_visto = new ArrayList<>();
     private static ArrayList<Integer> map_real = new ArrayList<>();
     
@@ -175,6 +175,10 @@ public class PruebaThetaEstrella {
         for(int i = x_actual-vision; i <= x_actual+vision; i++){
             for(int j = y_actual-vision; j <= y_actual+vision; j++){
                 //Actualiza mapa
+                if(i<0 || i > m_real || j<0 || j>m_real){
+                    continue;   //siguiente iteracion si se sale de los limites
+                }
+                
                 map_visto.set(j * m_real + i, map_real.get(j * m_real + i));
                 
                  MapPoint punto = new MapPoint(i,j);
@@ -184,7 +188,7 @@ public class PruebaThetaEstrella {
                  
                 //Comprobar si es un limite de su campo de visión (si va a abiertos o no
                 if(i == x_actual-vision || i == x_actual+vision || j == y_actual-vision || j == y_actual+vision){
-                    if((map_real.get(j * m_real + i) == 1)){
+                    if((map_real.get(j * m_real + i) == 1) || (map_real.get(j * m_real + i) == -1)){
                         if(!cerrados.contains(punto)){
                             if(abiertos.contains(punto)){
                                 abiertos.remove(abiertos.indexOf(punto));
@@ -220,8 +224,8 @@ public class PruebaThetaEstrella {
         loadMap(MAPA);
         System.out.println("tamanio map_real: " + map_real.size());
         ThetaStar z = new ThetaStar(m_real, map_visto);
-        x_actual = 5;
-        y_actual = 2;
+        x_actual = 25;
+        y_actual = 3;
         
         receiveRadar();
         
