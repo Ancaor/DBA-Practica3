@@ -36,6 +36,12 @@ public class PruebaThetaEstrella {
     private static boolean encontradoObjetivo = false;
     
     
+    private static boolean objetivoDefinido = true;
+    
+    private static int x_fin = 46;
+    private static int y_fin = 46;
+    private static MapPoint pFin = new MapPoint(x_fin, y_fin);
+    
     private static int m_real=500;
     private static int n_real=500;
     
@@ -183,6 +189,22 @@ public class PruebaThetaEstrella {
         return pMasCercano;
     }
     
+    public static MapPoint abiertoMasCercanoFin(){
+   
+        MapPoint pMasCercano = abiertos.get(0);
+        
+        double distanciaMenor = distance(pMasCercano, pFin);
+        
+        for(int i = 1; i < abiertos.size(); i++){
+            if(distance(abiertos.get(i),pFin) < distanciaMenor){
+                distanciaMenor = distance(abiertos.get(i),pFin);
+                pMasCercano = abiertos.get(i);
+            }
+        }
+        
+        return pMasCercano;
+    }
+    
     public static double distance(MapPoint p1, MapPoint p2){
         int xValue = (p1.x-p2.x)*(p1.x-p2.x);
         int yValue = (p1.y-p2.y)*(p1.y-p2.y);
@@ -213,6 +235,63 @@ public class PruebaThetaEstrella {
                  if(map_real.get(j * m_real + i) == 2){
                      encontradoObjetivo = true;
                  }
+                 
+                //Comprobar si es un limite de su campo de visión (si va a abiertos o no
+                if(i == x_actual-vision || i == x_actual+vision || j == y_actual-vision || j == y_actual+vision){
+                    if((map_real.get(j * m_real + i) == 1) || (map_real.get(j * m_real + i) == -1)){
+                        if(!cerrados.contains(punto)){
+                            if(abiertos.contains(punto)){
+                                abiertos.remove(abiertos.indexOf(punto));
+                            }
+                            cerrados.add(punto);
+                        }
+                    }
+                    
+                    else{
+                        if(!cerrados.contains(punto) && !abiertos.contains(punto)){
+                            ThetaStar ts = new ThetaStar(m_real,map_visto);
+                            ArrayList<MapPoint> path = ts.calculateThetaStar(new MapPoint(x_actual, y_actual), punto);
+                            if(path != null){
+                                abiertos.add(punto);
+                            }
+                        }
+                    }
+                }
+                
+                else{
+                   
+                    if(!cerrados.contains(punto)){
+                        if(abiertos.contains(punto)){
+                            abiertos.remove(abiertos.indexOf(punto));
+                        }
+                        cerrados.add(punto);
+                    }
+                }
+            }
+        }
+    }
+    public static void receiveRadarFin(){
+        //Bucle que actualiza mapa
+        for(int i = x_actual-vision; i <= x_actual+vision; i++){
+            for(int j = y_actual-vision; j <= y_actual+vision; j++){
+                if(i<0 || i >= m_real || j<0 || j>=m_real){
+                    continue;   //siguiente iteracion si se sale de los limites
+                }
+                
+                map_visto.set(j * m_real + i, map_real.get(j * m_real + i));
+                
+            }
+        }
+        
+        for(int i = x_actual-vision; i <= x_actual+vision; i++){
+            for(int j = y_actual-vision; j <= y_actual+vision; j++){
+                //Actualiza mapa
+                if(i<0 || i >= m_real || j<0 || j>=m_real){
+                    continue;   //siguiente iteracion si se sale de los limites
+                }
+
+                 MapPoint punto = new MapPoint(i,j);
+                 
                  
                 //Comprobar si es un limite de su campo de visión (si va a abiertos o no
                 if(i == x_actual-vision || i == x_actual+vision || j == y_actual-vision || j == y_actual+vision){
@@ -396,34 +475,70 @@ public class PruebaThetaEstrella {
      //   abiertos.remove(abiertos.remove(abiertos.indexOf(new MapPoint(4,1))));
         //De momento coge siempre el primero
         printMap();
-        while(!encontradoObjetivo){
-            ArrayList<MapPoint> path = null;
-            MapPoint puntoObjetivo = null;
-            while(path == null){
-                puntoObjetivo = abiertoMasCercano();
-                z = new ThetaStar(m_real, map_visto);
-                path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
-                if(path == null){
-                    abiertos.remove(abiertos.indexOf(puntoObjetivo));
+        
+        if(!objetivoDefinido){
+            while(!encontradoObjetivo){
+                ArrayList<MapPoint> path = null;
+                MapPoint puntoObjetivo = null;
+                while(path == null){
+                    puntoObjetivo = abiertoMasCercano();
+                    z = new ThetaStar(m_real, map_visto);
+                    path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
+                    if(path == null){
+                        abiertos.remove(abiertos.indexOf(puntoObjetivo));
+                    }
+                }
+                System.out.println("\n-----Yendo al punto: " + puntoObjetivo.toString());
+
+                ArrayList<String> ordenes = z.convertToInstructions(path, new MapPoint(x_actual, y_actual));
+
+                System.out.println("Size ordenes: " + ordenes.size());
+
+                for(int i = 0; i < ordenes.size() && abiertos.contains(puntoObjetivo) && !encontradoObjetivo; i++){
+
+                    actuarOrden(ordenes.get(i));
+                    receiveRadar();
+                    System.out.println("\n\nOrden ejecutada: " + ordenes.get(i));
+                    System.out.println("PosActual- x:" + x_actual + " y:" + y_actual);
+         //           System.out.println("Abiertos: " + abiertos.toString());
+         //           System.out.println("Cerrados: " + cerrados.toString());
+                  //  printMap();
+                      //      PrintMapImage();
+
                 }
             }
-            System.out.println("\n-----Yendo al punto: " + puntoObjetivo.toString());
-            
-            ArrayList<String> ordenes = z.convertToInstructions(path, new MapPoint(x_actual, y_actual));
-            
-            System.out.println("Size ordenes: " + ordenes.size());
-            
-            for(int i = 0; i < ordenes.size() && abiertos.contains(puntoObjetivo) && !encontradoObjetivo; i++){
-        
-                actuarOrden(ordenes.get(i));
-                receiveRadar();
-                System.out.println("\n\nOrden ejecutada: " + ordenes.get(i));
-                System.out.println("PosActual- x:" + x_actual + " y:" + y_actual);
-     //           System.out.println("Abiertos: " + abiertos.toString());
-     //           System.out.println("Cerrados: " + cerrados.toString());
-              //  printMap();
-                  //      PrintMapImage();
-            
+        }else{
+            while(!encontradoObjetivo){
+                ArrayList<MapPoint> path = null;
+                MapPoint puntoObjetivo = null;
+                while(path == null){
+                    puntoObjetivo = abiertoMasCercanoFin();
+                    z = new ThetaStar(m_real, map_visto);
+                    path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
+                    if(path == null){
+                        abiertos.remove(abiertos.indexOf(puntoObjetivo));
+                    }
+                }
+                System.out.println("\n-----Yendo al punto: " + puntoObjetivo.toString());
+
+                ArrayList<String> ordenes = z.convertToInstructions(path, new MapPoint(x_actual, y_actual));
+
+                System.out.println("Size ordenes: " + ordenes.size());
+
+                for(int i = 0; i < ordenes.size() && abiertos.contains(puntoObjetivo) && !encontradoObjetivo; i++){
+
+                    actuarOrden(ordenes.get(i));
+                    receiveRadarFin();
+                    System.out.println("\n\nOrden ejecutada: " + ordenes.get(i));
+                    System.out.println("PosActual- x:" + x_actual + " y:" + y_actual);
+         //           System.out.println("Abiertos: " + abiertos.toString());
+         //           System.out.println("Cerrados: " + cerrados.toString());
+                  //  printMap();
+                      //      PrintMapImage();
+
+                }
+                if(x_actual == x_fin && y_actual == y_fin)
+                    encontradoObjetivo = true;
             }
         }
    
