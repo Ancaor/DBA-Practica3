@@ -54,6 +54,7 @@ public class AgentTruck extends Agent{
     
     private static final int WAIT_CONTROLLER = 0;
     private static final int WAIT_SERVER_CHEKIN = 1;
+    private static final int REQUEST_WORLD_INFO = 2;
    // private static final int REQUEST_CHECKIN = 2;
    // private static final int WAIT_CHECKIN = 3;
     private static final int FINISH = 5;
@@ -85,6 +86,9 @@ public class AgentTruck extends Agent{
                     break;
                case WAIT_SERVER_CHEKIN:
                     wait_server_chekin();
+                    break;
+                case REQUEST_WORLD_INFO:
+                    requestWorldInfo();
                     break;
          /*       case REQUEST_CHECKIN:
                     requestCheckin();
@@ -136,7 +140,7 @@ public class AgentTruck extends Agent{
             state=WAIT_SERVER_CHEKIN;
         }else if(performativa.equals("REQUEST") && content.contains("START")){
             System.out.println(ANSI_PURPLE+ "Coche ya puede moverse");
-            state=FINISH;
+            state=REQUEST_WORLD_INFO;
         }else if(performativa.equals("REQUEST") && content.contains("RESET")){
             System.out.println(ANSI_PURPLE+ "reinicio requerido");
             state= WAIT_CONTROLLER;
@@ -221,9 +225,34 @@ public class AgentTruck extends Agent{
                     if(fuelrate_ == 2)
                         check = true;
                 break;
+                
+            
         }
         
         return check;
+    }
+    
+    private void requestWorldInfo() {
+        
+        System.out.println(ANSI_BLUE + "Solicita información del mundo");
+            
+        this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
+        
+        ArrayList<String> respuesta = this.receiveMessage();
+        
+        String performativa = respuesta.get(0);
+        String conv_id = respuesta.get(1);
+        String content = respuesta.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(ANSI_BLUE+content);
+        System.out.println(conv_id);
+        System.out.println(reply_with_server);
+        
+        this.sendMessage(controllerAgent, content, fuelrate, conversationID, content, content);
+        
+        state=FINISH;
+        
     }
 
  

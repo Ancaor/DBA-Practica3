@@ -27,10 +27,10 @@ import javax.imageio.ImageIO;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car111111";
-    String car2Agent_name = "car1222";
-    String truckAgent_name = "truck111";
-    String dronAgent_name = "dron111";
+    String car1Agent_name = "car11111111";
+    String car2Agent_name = "car122222";
+    String truckAgent_name = "truck1111";
+    String dronAgent_name = "dron1111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -47,6 +47,7 @@ public class AgentController extends Agent{
     private static final int REQUEST_CHECKIN = 2;
     private static final int WAIT_CHECKIN = 3;
     private static final int FINISH = 5;
+    private static final int FINISH_ERROR=8;
     private static final int SEND_COMMAND = 6;
     
     private int state;
@@ -96,6 +97,9 @@ public class AgentController extends Agent{
                 case FINISH:
                     finish();
                 break;
+                case FINISH_ERROR:
+                    finish_error();
+                    break;
 /*
                 case SEND_COMMAND:
                     sendCommand();
@@ -110,6 +114,13 @@ public class AgentController extends Agent{
 
     private void finish() {
         this.finish=true;
+        
+        // RECEIVE DE LOS COCHES ANTES DE FINALIZAR PARA QUE NO CIERRE LA SESION
+        this.receiveMessage();
+        this.receiveMessage();
+        this.receiveMessage();
+        this.receiveMessage();
+        ////////////////////////////////////////////////////////////////////////
         
         this.sendMessage(this.serverAgent, "", ACLMessage.CANCEL, "","", "");
         
@@ -172,7 +183,7 @@ public class AgentController extends Agent{
         }else{
             System.out.println(ANSI_RED+"Fallo al suscribirse");
             System.out.println(response.get(3));
-            state=FINISH;
+            state=FINISH_ERROR;
         }
         
     }
@@ -272,6 +283,39 @@ public class AgentController extends Agent{
             this.state = SUSCRIBE;
         }
         
+    }
+    
+    public void finish_error(){
+        this.finish=true;
+        
+        this.sendMessage(this.serverAgent, "", ACLMessage.CANCEL, "","", "");
+        
+        ArrayList<String> agree = this.receiveMessage();
+        System.out.println(agree.get(0));
+        ArrayList<String> mensaje_traza = this.receiveMessage();
+        
+        BufferedImage im = null;
+        try{
+                System.out.println(ANSI_RED+"Recibiendo traza ...");
+
+                JsonObject injson = Json.parse(mensaje_traza.get(3)).asObject();
+
+                JsonArray array = injson.get("trace").asArray();
+                byte data[] = new byte[array.size()];
+                for(int i = 0; i<data.length; i++)
+                    data[i] = (byte) array.get(i).asInt();
+
+                FileOutputStream fos  = new FileOutputStream("mitraza.png");
+                fos.write(data);
+                fos.close();
+
+                 im = ImageIO.read(new File("mitraza.png"));
+                
+                System.out.println(ANSI_RED+"TAMANIO MAPA: " + im.getWidth());
+                System.out.println(ANSI_RED+"Traza guardada");
+            }catch(IOException ex){
+                System.out.println(ANSI_RED+"Error procesando traza");
+            }
     }
     
 }

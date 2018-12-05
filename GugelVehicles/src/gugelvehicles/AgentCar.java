@@ -6,6 +6,7 @@
 package gugelvehicles;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
@@ -40,7 +41,7 @@ public class AgentCar extends Agent {
     private int battery;
     private int x;
     private int y;
-    private ArrayList<Integer> radar;
+    private ArrayList<Integer> radar = new ArrayList<>();
     
     //
     
@@ -50,11 +51,13 @@ public class AgentCar extends Agent {
     
     private static final int WAIT_CONTROLLER = 0;
     private static final int WAIT_SERVER_CHEKIN = 1;
-   // private static final int REQUEST_CHECKIN = 2;
+    private static final int REQUEST_WORLD_INFO = 2;
    // private static final int WAIT_CHECKIN = 3;
     private static final int FINISH = 5;
    // private static final int SEND_COMMAND = 6;
     private String conversationID;
+    private int enery;
+    private boolean goal;
     
     
     public AgentCar(AgentID aid, AgentID serverID, AgentID controllerID) throws Exception {
@@ -84,11 +87,11 @@ public class AgentCar extends Agent {
                case WAIT_SERVER_CHEKIN:
                     wait_server_chekin();
                     break;
-         /*       case REQUEST_CHECKIN:
-                    requestCheckin();
+                case REQUEST_WORLD_INFO:
+                    requestWorldInfo();
                     break;
 
-                case WAIT_CHECKIN:
+         /*       case WAIT_CHECKIN:
                     waitCheckin();
                     break;
 
@@ -134,7 +137,7 @@ public class AgentCar extends Agent {
             state=WAIT_SERVER_CHEKIN;
         }else if(performativa.equals("REQUEST") && content.contains("START")){
             System.out.println(ANSI_BLUE+ "Coche ya puede moverse");
-            state=FINISH;
+            state=REQUEST_WORLD_INFO;
         }else if(performativa.equals("REQUEST") && content.contains("RESET")){
             System.out.println(ANSI_BLUE+ "reinicio requerido");
             state= WAIT_CONTROLLER;
@@ -223,6 +226,55 @@ public class AgentCar extends Agent {
         }
         
         return check;
+    }
+
+    private void requestWorldInfo() {
+        
+        System.out.println(ANSI_BLUE + "Solicita información del mundo");
+            
+        this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
+        
+        ArrayList<String> respuesta = this.receiveMessage();
+        
+        String performativa = respuesta.get(0);
+        String conv_id = respuesta.get(1);
+        String content = respuesta.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(ANSI_BLUE+content);
+        System.out.println(conv_id);
+        System.out.println(reply_with_server);
+        
+        JsonObject object = Json.parse(content).asObject();
+        
+        JsonObject result = object.get("result").asObject();
+        
+        this.battery = result.get("battery").asInt();
+        System.out.println("bateria " + this.battery);
+        this.x = result.get("x").asInt()+2;
+        this.y = result.get("y").asInt()+2;
+        System.out.println("x " + this.x + " y "+ this.y);
+        JsonArray aux = result.get("sensor").asArray();
+        
+        for(int i=0; i < aux.size();i++){
+            this.radar.add(aux.get(i).asInt());
+        }
+        
+        for(int i=0; i < radar.size(); i++){
+            System.out.println(radar.get(i));
+        }
+        
+        this.enery = result.get("energy").asInt();
+        this.goal = result.get("goal").asBoolean();
+        
+        
+        
+        //PROVISIONAL
+        //////////////////
+        this.sendMessage(controllerAgent, content, fuelrate, conversationID, content, content);
+        
+        state=FINISH;
+        ///////////////7
     }
 
 }
