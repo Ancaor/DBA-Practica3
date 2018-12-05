@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import ThetaStar.*;
+import java.util.Map;
 
 /**
  *
@@ -46,6 +48,9 @@ public class AgentController extends Agent{
     private static final int AWAKE_AGENTS = 1;
     private static final int REQUEST_CHECKIN = 2;
     private static final int WAIT_CHECKIN = 3;
+    private static final int WAIT_IDLE = 4;
+    private static final int REQUEST_INFO = 7;
+    private static final int UPDATE_INFO = 8;
     private static final int FINISH = 5;
     private static final int SEND_COMMAND = 6;
     
@@ -56,9 +61,24 @@ public class AgentController extends Agent{
     private AgentCar agentCar1;
     private AgentID controllerAgent;
     
+    ////////////////////////////////////////////
+    private int turnoActual = 0;
+    private ArrayList<AgentID> arrayVehiculos = new ArrayList<>();
+    private ArrayList<Integer> abiertos = new ArrayList<>();
+    private ArrayList<Integer> cerrados = new ArrayList<>();
+    private ArrayList<Integer> radar = new ArrayList<>();
+    private int posicionVehiculo;
+    private int objetivePos;
+    /////////////////////////////////////////////
+   // private Map<Integer, Integer> mapAbiertos = new Map<Integer, Integer>();
+    ////////////////////////////////////////////
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
+        this.arrayVehiculos.add(this.car1Agent);
+        this.arrayVehiculos.add(this.car2Agent);
+        this.arrayVehiculos.add(this.truckAgent);
+        this.arrayVehiculos.add(this.dronAgent);
         
         this.controllerAgent = aid;
         
@@ -93,6 +113,18 @@ public class AgentController extends Agent{
                     waitCheckin();
                     break;
 
+                case WAIT_IDLE:
+                    waitIdle();
+                    break;
+                
+                case REQUEST_INFO:
+                    requestInfo();
+                    break;
+                    
+                case UPDATE_INFO:
+                    updateInfo();
+                    break;
+                    
                 case FINISH:
                     finish();
                 break;
@@ -106,6 +138,64 @@ public class AgentController extends Agent{
            
         }
        System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
+    }
+    
+    private void updateInfo(){
+        
+    }
+    
+    private void requestInfo(){
+        abiertos.clear();
+        cerrados.clear();
+        this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
+        ArrayList<String> msg = this.receiveMessage();
+        String contenido = msg.get(3);
+        
+        JsonObject object = Json.parse(contenido).asObject();
+        JsonArray abiertosJson = object.get("abiertos").asArray();
+       // ArrayList<Integer> abiertosInt = new ArrayList<>();
+        
+        for(int i = 0; i < abiertosJson.size(); i++){
+            abiertos.add(abiertosJson.get(i).asInt());
+        }
+        
+        JsonArray cerradosJson = object.get("cerrados").asArray();
+       // ArrayList<Integer> abiertosInt = new ArrayList<>();
+        
+        for(int i = 0; i < cerradosJson.size(); i++){
+            cerrados.add(cerradosJson.get(i).asInt());
+        }
+        
+        posicionVehiculo = object.get("pos").asInt();
+        this.objetivePos = object.get("objetive_pos").asInt();
+
+        JsonArray radarJson = object.get("radar").asArray();
+       // ArrayList<Integer> abiertosInt = new ArrayList<>();
+        
+        for(int i = 0; i < radarJson.size(); i++){
+            radar.add(radarJson.get(i).asInt());
+        }
+        
+        this.state = UPDATE_INFO;
+    }
+    
+    private void waitIdle(){
+        ArrayList<String> msg1 = this.receiveMessage();
+        ArrayList<String> msg2 = this.receiveMessage();
+        ArrayList<String> msg3 = this.receiveMessage();
+        ArrayList<String> msg4 = this.receiveMessage();
+        
+        state = REQUEST_INFO;
+        if(DEBUG){
+            if(msg1.get(3).contains("IDLE") && msg2.get(3).contains("IDLE") 
+                    && msg3.get(3).contains("IDLE") && msg4.get(3).contains("IDLE")){       //Si contiene IDLE
+                System.out.println("Todos a IDLE");
+            }
+
+            else{
+                System.out.println("Error en WAIT_IDLE");
+            }
+        }
     }
 
     private void finish() {
