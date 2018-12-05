@@ -28,6 +28,7 @@ public class ThetaStar {
     }
     
     public ArrayList<MapPoint> calculateThetaStar(MapPoint start, MapPoint goal){
+        System.out.println("GOAL: " + (this.map_real.get(goal.y * this.width + goal.x)));
         if((this.map_real.get(goal.y * this.width + goal.x) == 1) || (this.map_real.get(goal.y * this.width + goal.x) == -1)){
             return null;
         }

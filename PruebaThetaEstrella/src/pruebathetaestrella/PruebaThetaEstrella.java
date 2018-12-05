@@ -411,7 +411,7 @@ public class PruebaThetaEstrella {
                  img.setRGB(y, x, p);
                 }
             
-                if((map_visto.get(x*m_real+y) == 1) || (map_visto.get(x*m_real+y) == 1)){
+                if((map_visto.get(x*m_real+y) == 1) || (map_visto.get(x*m_real+y) == -1)){
                     int a = 255; //alpha
                     int r = 0;
                     int g = 0;
@@ -457,6 +457,82 @@ public class PruebaThetaEstrella {
        }
     }//main() ends here
 
+    
+    public static void DrawTraza(){
+       //image dimension
+       int width = m_real;
+       int height = m_real;
+       //create buffered image object img
+       BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+       //file object
+       File f = null;
+       //create random image pixel by pixel
+       for(int y = 0; y < height; y++){
+           //Pintar mapa blanco y negro
+         for(int x = 0; x < width; x++){
+           int a = 255; //alpha
+           int r = 255;
+           int g = 255;
+           int b = 255;
+
+           int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+           img.setRGB(y, x, p);
+         }
+       }
+       
+              
+        for(int y = 0; y < height; y++){
+           //Pintar mapa de abiertos y cerrados
+            for(int x = 0; x < width; x++){
+
+            
+                if((map_visto.get(x*m_real+y) == 1) || (map_visto.get(x*m_real+y) == -1)){
+                    int a = 255; //alpha
+                    int r = 0;
+                    int g = 0;
+                    int b = 0;
+
+                    int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+                    img.setRGB(y, x, p);
+                }
+            }
+        }
+       
+        for(int y = 0; y < height; y++){
+           //Pintar mapa traza
+         for(int x = 0; x < width; x++){
+           int a = 255; //alpha
+           int r = 0;
+           int g = 255;
+           int b = 0;
+           if(traza.contains(new MapPoint(y,x))){
+
+            int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+            img.setRGB(y, x, p);
+           }
+         }
+         
+         //pintar posicion acutal
+           int a = 255; //alpha
+           int r = 0;
+           int g = 0;
+           int b = 255;
+           int p = (a<<24) | (r<<16) | (g<<8) | b;
+           img.setRGB(x_actual, y_actual, p);
+       }
+       //write image
+       try{
+           ImageIO.write(img, "png", new File("test_COLOR"+MAPA+"it"+num_iteraciones+".png"));
+         //f = new File("C:\\Cuarto\\Output.png");
+       //  ImageIO.write(img, "png", f);
+       }catch(IOException e){
+         System.out.println("Error: " + e);
+       }
+    }//main() ends here
+    
     /**
      * @param args the command line arguments
      */
@@ -474,7 +550,26 @@ public class PruebaThetaEstrella {
         System.out.println("Pruba indexOf (4,1): " + abiertos.indexOf(new MapPoint(4,1)));
      //   abiertos.remove(abiertos.remove(abiertos.indexOf(new MapPoint(4,1))));
         //De momento coge siempre el primero
-        printMap();
+       // printMap();
+        
+        
+           //DEBUG THETA*
+           /*
+        map_visto = map_real;
+        System.out.println("m_real: " + m_real + " map_visto size: " + map_visto.size());
+        z = new ThetaStar(m_real, map_visto);
+        System.out.println("MapReal contiene: " + map_real.get(54 * m_real + 150));
+        ArrayList<MapPoint> path = z.calculateThetaStar(new MapPoint(51, 3), new MapPoint(51,38));
+        ArrayList<String> instruction = z.convertToInstructions(path, new MapPoint(51,3));
+        System.out.println("SIZE: " + path.size());
+        for(int i = 0; i < path.size(); i++){
+           // System.out.println("Movimiento i:(" + i + ")= " + path.get(i));
+            actuarOrden(instruction.get(i));
+            DrawTraza();
+        }
+       */
+        
+        
         
         if(!objetivoDefinido){
             while(!encontradoObjetivo){
@@ -535,15 +630,15 @@ public class PruebaThetaEstrella {
          //           System.out.println("Cerrados: " + cerrados.toString());
                   //  printMap();
                       //      PrintMapImage();
-
+                    DrawColor();
                 }
                 if(x_actual == x_fin && y_actual == y_fin)
                     encontradoObjetivo = true;
             }
         }
    
-        DrawColor();
-        PrintMapImage();
+
+        //PrintMapImage();
        //  PrintMapImage();
         
         //ArrayList<MapPoint> path = null;
