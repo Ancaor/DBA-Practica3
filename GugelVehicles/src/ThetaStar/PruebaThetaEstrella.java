@@ -5,6 +5,7 @@
  */
 package ThetaStar;
 
+import static gugelvehicles.Agent.ANSI_YELLOW;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
@@ -55,6 +56,29 @@ public class PruebaThetaEstrella {
     private static ArrayList<MapPoint> abiertos = new ArrayList<>();
     private static ArrayList<MapPoint> cerrados = new ArrayList<>();
     private static ArrayList<MapPoint> traza = new ArrayList<>();
+    
+    
+    private static int m = 500;
+     
+    public static void initMap(ArrayList<Integer> mapa){
+        
+
+        
+        for(int i = 0; i < m*2; i+=1)
+            mapa.add(2);
+ 
+        for(int i = 0; i < m-4; i+=1){
+           mapa.add(2);
+           mapa.add(2);
+           for (int j = 0; j < m-4; j+=1)
+               mapa.add(-1);
+           mapa.add(2);
+           mapa.add(2);
+        }
+        
+        for(int i = 0; i < m*2; i+=1)
+            mapa.add(2);
+    }
     
     public static void loadMap(String mapName){
         Scanner sc;
@@ -537,6 +561,16 @@ public class PruebaThetaEstrella {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        ArrayList<Integer> mapaInit = new ArrayList<>();
+        initMap(mapaInit);
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < m; j++){
+                System.out.print(mapaInit.get(i*m + j) + " ");
+            }
+            
+            System.out.print("\n");
+        }
+        
         loadMap(MAPA);
         System.out.println("tamanio map_real: " + map_real.size());
         ThetaStar z = new ThetaStar(m_real, map_visto);

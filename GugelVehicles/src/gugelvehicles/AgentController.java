@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import ThetaStar.*;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -66,12 +67,19 @@ public class AgentController extends Agent{
     private ArrayList<AgentID> arrayVehiculos = new ArrayList<>();
     private ArrayList<Integer> abiertos = new ArrayList<>();
     private ArrayList<Integer> cerrados = new ArrayList<>();
+    private HashMap<Integer, ArrayList<AgentID>> abiertosFinal = new HashMap<>();
+    private HashMap<Integer, ArrayList<AgentID>> cerradosFinal = new HashMap<>();
+    private ArrayList<Integer> mapa = new ArrayList<>();
     private ArrayList<Integer> radar = new ArrayList<>();
-    private int posicionVehiculo;
+    private int posicionVehiculoX;
+    private int posicionVehiculoY;
     private int objetivePos;
     /////////////////////////////////////////////
    // private Map<Integer, Integer> mapAbiertos = new Map<Integer, Integer>();
     ////////////////////////////////////////////
+    
+    private  static int m = 504;
+    private  static int n = 504;
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
@@ -80,14 +88,37 @@ public class AgentController extends Agent{
         this.arrayVehiculos.add(this.truckAgent);
         this.arrayVehiculos.add(this.dronAgent);
         
+        
         this.controllerAgent = aid;
         
         this.serverAgent = server_id;
         this.state = AWAKE_AGENTS;
+        
+        initMap(mapa);
+        
     }
+  
     
-    
-    
+    public void initMap(ArrayList<Integer> mapa){
+        
+        if(DEBUG)
+            System.out.println(ANSI_YELLOW+"INIT MAP");
+        
+        for(int i = 0; i < m*2; i+=1)
+            mapa.add(2);
+ 
+        for(int i = 0; i < m-4; i+=1){
+           mapa.add(2);
+           mapa.add(2);
+           for (int j = 0; j < m-4; j+=1)
+               mapa.add(-1);
+           mapa.add(2);
+           mapa.add(2);
+        }
+        
+        for(int i = 0; i < m*2; i+=1)
+            mapa.add(2);
+    }
     
     @Override
     public void execute(){
@@ -141,6 +172,70 @@ public class AgentController extends Agent{
     }
     
     private void updateInfo(){
+        for(int i = 0; i < cerrados.size(); i++){
+            ArrayList<AgentID> coincidencias = new ArrayList<>();
+            if(!cerradosFinal.containsKey(cerrados.get(i))){                
+                cerradosFinal.put(cerrados.get(i), coincidencias);
+            }
+            else{
+                coincidencias = cerradosFinal.get(cerrados.get(i));
+            }
+            
+            if(!coincidencias.contains(arrayVehiculos.get(turnoActual))){
+                    coincidencias.add(arrayVehiculos.get(turnoActual));
+                    cerradosFinal.put(cerrados.get(i), coincidencias);
+            }
+        }
+        
+        for(int i = 0; i < abiertos.size(); i++){
+            if(!cerradosFinal.containsKey(abiertos.get(i))){
+                ArrayList<AgentID> coincidencias = new ArrayList<>();
+                if(!abiertosFinal.containsKey(abiertos.get(i))){                
+                    abiertosFinal.put(abiertos.get(i), coincidencias);
+                }
+                else{
+                    coincidencias = abiertosFinal.get(abiertos.get(i));
+                }
+
+                if(!coincidencias.contains(arrayVehiculos.get(turnoActual))){
+                        coincidencias.add(arrayVehiculos.get(turnoActual));
+                        abiertosFinal.put(abiertos.get(i), coincidencias);
+                }
+            }
+        }
+        
+        
+        cerrados.clear();
+        abiertos.clear();
+        int tamanio = 0;
+        
+        if(radar.size() == 9){
+            tamanio = 1;
+        }
+        else if(radar.size() == 25){
+            tamanio = 2;
+        }    
+        else{
+            tamanio = 5;
+        }
+        
+        int index = 0;
+            for(int i = posicionVehiculoY-tamanio; i <= posicionVehiculoY+tamanio; i++)
+                for(int j = posicionVehiculoX-tamanio; j <= posicionVehiculoX+tamanio; j++){
+                    if(mapa.get(i*m+j) ==0 && radar.get(index) ==1){
+                        if(DEBUG)
+                            System.out.println(ANSI_YELLOW+"SOBRESCRIBIENDO UN CERO CON UN UNO");
+                    }
+                    if(DEBUG)
+                        System.out.println(ANSI_YELLOW+radar.get(index));
+                    
+                    mapa.set(i*m+j, radar.get(index));
+                    if(mapa.get(i*m+j) == 0){
+                        if(DEBUG)
+                            System.out.println(ANSI_YELLOW+"PUESTOS 0");
+                    }
+                    index+=1;
+                }
         
     }
     
@@ -166,8 +261,11 @@ public class AgentController extends Agent{
             cerrados.add(cerradosJson.get(i).asInt());
         }
         
-        posicionVehiculo = object.get("pos").asInt();
-        this.objetivePos = object.get("objetive_pos").asInt();
+        posicionVehiculoX = object.get("posX").asInt();
+        posicionVehiculoY = object.get("posY").asInt();
+        if(object.get("objetive_pos") == null){
+            this.objetivePos = object.get("objetive_pos").asInt();
+        }
 
         JsonArray radarJson = object.get("radar").asArray();
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
@@ -175,6 +273,8 @@ public class AgentController extends Agent{
         for(int i = 0; i < radarJson.size(); i++){
             radar.add(radarJson.get(i).asInt());
         }
+        
+        
         
         this.state = UPDATE_INFO;
     }
