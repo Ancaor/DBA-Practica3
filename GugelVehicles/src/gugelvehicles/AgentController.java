@@ -52,6 +52,7 @@ public class AgentController extends Agent{
     private static final int WAIT_IDLE = 4;
     private static final int REQUEST_INFO = 7;
     private static final int UPDATE_INFO = 8;
+    private static final int SELECT_POSITION = 9;
     private static final int FINISH = 5;
     private static final int SEND_COMMAND = 6;
     
@@ -74,6 +75,12 @@ public class AgentController extends Agent{
     private int posicionVehiculoX;
     private int posicionVehiculoY;
     private int objetivePos;
+    
+    MapPoint nextObj;
+    private ArrayList<MapPoint> vehiclesPositions = new ArrayList<>(4);
+    private ArrayList<MapPoint> nextPositions = new ArrayList<>(4);    
+
+    
     /////////////////////////////////////////////
    // private Map<Integer, Integer> mapAbiertos = new Map<Integer, Integer>();
     ////////////////////////////////////////////
@@ -155,7 +162,9 @@ public class AgentController extends Agent{
                 case UPDATE_INFO:
                     updateInfo();
                     break;
-                    
+                case SELECT_POSITION:
+                    selectPosition();
+                    break;    
                 case FINISH:
                     finish();
                 break;
@@ -169,6 +178,44 @@ public class AgentController extends Agent{
            
         }
        System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
+    }
+    public MapPoint iniciarMapPoint(int a){
+        int x = a/504;
+        int y = a%504;
+        MapPoint resultado = new MapPoint(x,y);
+        return resultado;
+    }
+   
+    public double distance(MapPoint p1, MapPoint p2){
+        int xValue = (p1.x-p2.x)*(p1.x-p2.x);
+        int yValue = (p1.y-p2.y)*(p1.y-p2.y);
+        return Math.sqrt(xValue+yValue);
+    } 
+    
+    private void selectPosition(){
+        Objetivo proxObj = new Objetivo();
+               
+        ArrayList<Integer> abi = new ArrayList<>();
+        ArrayList<Integer> cer = new ArrayList<>();
+        
+        for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
+            if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
+                abi.add(entry.getKey());
+            }
+        }
+
+        ArrayList<MapPoint> posOcupadas = new ArrayList<>();
+        for(int i = 0; i < vehiclesPositions.size(); i++){
+            if(vehiclesPositions.get(i) != new MapPoint(posicionVehiculoX, posicionVehiculoY)){
+                posOcupadas.add(vehiclesPositions.get(i));
+            }
+            
+            posOcupadas.add(nextPositions.get(i));
+        }
+        
+        nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
+        
+        nextPositions.set(turnoActual, nextObj);
     }
     
     private void updateInfo(){
@@ -263,6 +310,11 @@ public class AgentController extends Agent{
         
         posicionVehiculoX = object.get("posX").asInt();
         posicionVehiculoY = object.get("posY").asInt();
+        
+        MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
+        
+        vehiclesPositions.set(turnoActual, pos);
+        
         if(object.get("objetive_pos") == null){
             this.objetivePos = object.get("objetive_pos").asInt();
         }

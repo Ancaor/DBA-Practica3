@@ -13,7 +13,7 @@ public class MapPoint {
     public int x;
     public int y;
 
-    MapPoint(int x, int y) {
+    public MapPoint(int x, int y) {
         this.x = x;
         this.y = y;
     }
