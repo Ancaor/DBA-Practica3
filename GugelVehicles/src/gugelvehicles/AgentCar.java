@@ -9,6 +9,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class AgentCar extends Agent {
     private String conversationID;
     private int enery;
     private boolean goal;
+    private int position;
     
     
     public AgentCar(AgentID aid, AgentID serverID, AgentID controllerID) throws Exception {
@@ -251,8 +253,9 @@ public class AgentCar extends Agent {
         
         this.battery = result.get("battery").asInt();
         System.out.println("bateria " + this.battery);
-        this.x = result.get("x").asInt()+2;
-        this.y = result.get("y").asInt()+2;
+        this.x = result.get("x").asInt()+5;
+        this.y = result.get("y").asInt()+5;
+        this.position = this.x + (this.y * 510);
         System.out.println("x " + this.x + " y "+ this.y);
         JsonArray aux = result.get("sensor").asArray();
         
@@ -261,12 +264,43 @@ public class AgentCar extends Agent {
         }
         
         for(int i=0; i < radar.size(); i++){
-            System.out.println(radar.get(i));
+                
+            System.out.print(radar.get(i));
+            if((i+1)%this.range == 0)
+                System.out.print("\n");
         }
         
         this.enery = result.get("energy").asInt();
         this.goal = result.get("goal").asBoolean();
         
+        
+        ArrayList<Integer> abiertos = calcularAbiertos();
+        System.out.println("abiertos");
+        for(int i=0; i < abiertos.size(); i++){
+            System.out.println(abiertos.get(i));
+        }
+        ArrayList<Integer> cerrados = calcularCerrados();
+        System.out.println("cerrados");
+        for(int i=0; i < cerrados.size(); i++){
+            System.out.println(cerrados.get(i));
+        }
+        
+        int pos_objetivo = obtenerPosObjetivo();
+        System.out.println("pos_objetivo");
+        System.out.println(pos_objetivo);
+        
+        
+        JsonObject response = Json.object();
+        //JsonArray abiertos_json = Json.array();
+        
+        
+        
+        response.add("radar", this.convertToJson(radar));
+        response.add("abiertos", this.convertToJson(abiertos));
+        response.add("cerrados", this.convertToJson(cerrados));
+        response.add("pos", this.position );
+        response.add("objetive_pos", pos_objetivo);
+        System.out.println(response.toString());
         
         
         //PROVISIONAL
@@ -275,6 +309,73 @@ public class AgentCar extends Agent {
         
         state=FINISH;
         ///////////////7
+    }
+    
+    public ArrayList<Integer> calcularAbiertos(){
+        ArrayList<Integer> abiertos = new ArrayList<>();
+        
+        for(int i=0; i<this.range; i++)
+            abiertos.add(this.radar.get(i));
+        
+        for(int i=1; i < this.range-1; i++){
+            abiertos.add(this.radar.get(this.range*i));
+            abiertos.add(this.radar.get((this.range*(i+1))-1));
+        }
+        
+        for(int i=0; i < this.range; i++){
+            abiertos.add(this.radar.get((this.range*(this.range-1))+i));
+        }
+        
+        
+        return abiertos;
+    }
+    
+    public ArrayList<Integer> calcularCerrados(){
+        ArrayList<Integer> cerrados = new ArrayList<>();
+        
+        
+        for(int i=1; i < this.range-1; i++){
+            for(int j=1; j < this.range-1; j++){
+                cerrados.add(this.radar.get((this.range*i)+j));
+            }
+            
+        }
+        
+         
+        return cerrados;
+    }
+
+    private int obtenerPosObjetivo() {
+        int posObjetivo = -1;
+        
+        int x = this.x-((this.range-1)/2);
+        int y = this.y-((this.range-1)/2);
+        
+        for(int i=0; i < this.radar.size(); i++){
+            
+            if(this.radar.get(i) == 3){
+                posObjetivo = x + (y*510);
+            }
+            
+            if(i%this.range == 0 && i!= 0){
+                x = this.x-((this.range-1)/2);
+                y++;
+            }else{
+                x++;
+            }
+        }
+        
+        return posObjetivo;
+    }
+    
+    private JsonArray convertToJson(ArrayList<Integer> array){
+        JsonArray json = Json.array();
+        
+        for(int i=0; i < array.size(); i++){
+            json.add(array.get(i));
+        }
+        
+        return json;
     }
 
 }
