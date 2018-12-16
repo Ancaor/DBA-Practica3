@@ -85,8 +85,9 @@ public class AgentController extends Agent{
    // private Map<Integer, Integer> mapAbiertos = new Map<Integer, Integer>();
     ////////////////////////////////////////////
     
-    private  static int m = 504;
-    private  static int n = 504;
+    private static int tamanio_mapa = 510;
+    private  static int m = tamanio_mapa;
+    private  static int n = tamanio_mapa;
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
@@ -180,10 +181,14 @@ public class AgentController extends Agent{
        System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
     }
     public MapPoint iniciarMapPoint(int a){
-        int x = a/504;
-        int y = a%504;
+        int x = a/tamanio_mapa;
+        int y = a%tamanio_mapa;
         MapPoint resultado = new MapPoint(x,y);
         return resultado;
+    }
+    
+    public int transformarMapPoint(MapPoint m){
+        return m.x+m.y*tamanio_mapa;
     }
    
     public double distance(MapPoint p1, MapPoint p2){
@@ -216,6 +221,26 @@ public class AgentController extends Agent{
         nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
         
         nextPositions.set(turnoActual, nextObj);
+        
+        //Mandar mensaje al vehículo
+        JsonObject response = Json.object();
+  
+        
+        response.add("next_pos", transformarMapPoint(nextObj));
+        System.out.println(response.toString());
+        
+        this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
+                "", response.toString());
+
+
+        if(turnoActual < arrayVehiculos.size()-1){
+            turnoActual++;
+        }
+        else{
+            turnoActual = 0;
+        }
+        
+        state = REQUEST_INFO;
     }
     
     private void updateInfo(){
@@ -283,7 +308,7 @@ public class AgentController extends Agent{
                     }
                     index+=1;
                 }
-        
+        state = SELECT_POSITION;
     }
     
     private void requestInfo(){
