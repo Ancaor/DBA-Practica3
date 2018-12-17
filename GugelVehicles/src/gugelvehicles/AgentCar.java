@@ -67,6 +67,7 @@ public class AgentCar extends Agent {
     private String netx_pos;
     
     private JsonObject information_package;
+    private ArrayList<Integer> posiciones_Radar;
     
     
     public AgentCar(AgentID aid, AgentID serverID, AgentID controllerID) throws Exception {
@@ -233,12 +234,14 @@ public class AgentCar extends Agent {
             this.radar.add(aux.get(i).asInt());
         }
         
-        for(int i=0; i < radar.size(); i++){
+        this.posiciones_Radar = convertRadarToPositions();
+        
+      //  for(int i=0; i < radar.size(); i++){
                 
-            System.out.print(radar.get(i));
-            if((i+1)%this.range == 0)
-                System.out.print("\n");
-        }
+          //  System.out.print(radar.get(i));
+         //   if((i+1)%this.range == 0)
+            //    System.out.print("\n");
+       // }
         
         this.enery = result.get("energy").asInt();
         this.goal = result.get("goal").asBoolean();
@@ -247,17 +250,17 @@ public class AgentCar extends Agent {
         ArrayList<Integer> abiertos = calcularAbiertos();
         System.out.println("abiertos");
         for(int i=0; i < abiertos.size(); i++){
-            System.out.println(abiertos.get(i));
+          //  System.out.println(abiertos.get(i));
         }
         ArrayList<Integer> cerrados = calcularCerrados();
         System.out.println("cerrados");
         for(int i=0; i < cerrados.size(); i++){
-            System.out.println(cerrados.get(i));
+           // System.out.println(cerrados.get(i));
         }
         
         int pos_objetivo = obtenerPosObjetivo();
-        System.out.println("pos_objetivo");
-        System.out.println(pos_objetivo);
+       // System.out.println("pos_objetivo");
+       // System.out.println(pos_objetivo);
         
         
         information_package = Json.object();
@@ -347,19 +350,43 @@ public class AgentCar extends Agent {
         ArrayList<Integer> abiertos = new ArrayList<>();
         
         for(int i=0; i<this.range; i++)
-            abiertos.add(this.radar.get(i));
+            abiertos.add(this.posiciones_Radar.get(i));
         
         for(int i=1; i < this.range-1; i++){
-            abiertos.add(this.radar.get(this.range*i));
-            abiertos.add(this.radar.get((this.range*(i+1))-1));
+            abiertos.add(this.posiciones_Radar.get(this.range*i));
+            abiertos.add(this.posiciones_Radar.get((this.range*(i+1))-1));
         }
         
         for(int i=0; i < this.range; i++){
-            abiertos.add(this.radar.get((this.range*(this.range-1))+i));
+            abiertos.add(this.posiciones_Radar.get((this.range*(this.range-1))+i));
         }
         
         
         return abiertos;
+    }
+    
+    public ArrayList<Integer> convertRadarToPositions(){
+        ArrayList<Integer> posiciones = new ArrayList<>();
+        
+        int tamanio = 0;
+        
+        if(radar.size() == 9){
+            tamanio = 1;
+        }
+        else if(radar.size() == 25){
+            tamanio = 2;
+        }    
+        else{
+            tamanio = 5;
+        }
+        
+        int index = 0;
+            for(int i = this.y-tamanio; i <= this.y+tamanio; i++)
+                for(int j = this.x-tamanio; j <= this.x+tamanio; j++){
+                    posiciones.add(i*510+j);
+                }
+        
+        return posiciones;
     }
     
     public ArrayList<Integer> calcularCerrados(){
@@ -368,7 +395,7 @@ public class AgentCar extends Agent {
         
         for(int i=1; i < this.range-1; i++){
             for(int j=1; j < this.range-1; j++){
-                cerrados.add(this.radar.get((this.range*i)+j));
+                cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
             }
             
         }

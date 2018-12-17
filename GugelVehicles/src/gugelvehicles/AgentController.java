@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1111111111111111111";
-    String car2Agent_name = "car12221111111121122";
-    String truckAgent_name = "truck111111111111111";
-    String dronAgent_name = "dron111111111111111";
+    String car1Agent_name = "car111111111111111111111111111111111111111111";
+    String car2Agent_name = "car1122211111111111111111111111111111121122";
+    String truckAgent_name = "truc1k1111111111111111111111111111111111111";
+    String dronAgent_name = "dron11111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -97,6 +97,16 @@ public class AgentController extends Agent{
         this.arrayVehiculos.add(this.truckAgent);
         this.arrayVehiculos.add(this.dronAgent);
         
+        this.vehiclesPositions.add(new MapPoint(0,0));
+        this.vehiclesPositions.add(new MapPoint(0,0));
+        this.vehiclesPositions.add(new MapPoint(0,0));
+        this.vehiclesPositions.add(new MapPoint(0,0));
+        
+        this.nextPositions.add(new MapPoint(0,0));
+        this.nextPositions.add(new MapPoint(0,0));
+        this.nextPositions.add(new MapPoint(0,0));
+        this.nextPositions.add(new MapPoint(0,0));
+        
         
         this.controllerAgent = aid;
         
@@ -113,20 +123,27 @@ public class AgentController extends Agent{
         if(DEBUG)
             System.out.println(ANSI_YELLOW+"INIT MAP");
         
-        for(int i = 0; i < m*2; i+=1)
+        for(int i = 0; i < m*5; i+=1)
             mapa.add(2);
  
-        for(int i = 0; i < m-4; i+=1){
+        for(int i = 0; i < m-10; i+=1){
            mapa.add(2);
            mapa.add(2);
-           for (int j = 0; j < m-4; j+=1)
+           mapa.add(2);
+           mapa.add(2);
+           mapa.add(2);
+           for (int j = 0; j < m-10; j+=1)
                mapa.add(-1);
+           mapa.add(2);
+           mapa.add(2);
+           mapa.add(2);
            mapa.add(2);
            mapa.add(2);
         }
         
-        for(int i = 0; i < m*2; i+=1)
+        for(int i = 0; i < m*5; i+=1)
             mapa.add(2);
+        
     }
     
    
@@ -139,7 +156,9 @@ public class AgentController extends Agent{
     
     public String transformarMapPoint(MapPoint m){
         
-        if(m.y < this.posicionVehiculoY && m.x < this.posicionVehiculoX)
+        System.out.println(ANSI_RED + "m: " + m.x + ","+m.y + " pos: "+ this.posicionVehiculoX + ","+ this.posicionVehiculoY);
+        
+        if((m.y < this.posicionVehiculoY) && (m.x < this.posicionVehiculoX))
             return "moveNW";
         else if(m.y < this.posicionVehiculoY && m.x == this.posicionVehiculoX)
             return "moveN"; 
@@ -187,18 +206,22 @@ public class AgentController extends Agent{
     }
     
     private void selectPosition(){
-        
+        System.out.println(ANSI_RED + "seleccionando posición");
         if(!this.IsOnObjetive()){
+            //System.out.println(ANSI_RED + "No esta en el objetivo");
             Objetivo proxObj = new Objetivo();
 
             ArrayList<Integer> abi = new ArrayList<>();
             ArrayList<Integer> cer = new ArrayList<>();
 
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
+                System.out.println(entry.getValue().get(0));
                 if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
                     abi.add(entry.getKey());
                 }
             }
+            
+           
 
             ArrayList<MapPoint> posOcupadas = new ArrayList<>();
             for(int i = 0; i < vehiclesPositions.size(); i++){
@@ -208,15 +231,37 @@ public class AgentController extends Agent{
 
                 posOcupadas.add(nextPositions.get(i));
             }
-
+            
+            nextObj = new MapPoint(0,0);
+            
+            
+            ///////////////
+            System.out.println(posicionVehiculoX);
+            System.out.println(posicionVehiculoY);
+            System.out.println(finish);
+            System.out.println(objetivePos);
+            System.out.println(abi);
+            System.out.println(finish);
+            
+            for(int i=0; i < abi.size(); i++){
+                
+            }
+            
             nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
 
+            System.out.println(ANSI_RED + "No esta en el objetivo");
+            //////////////////////////////////////////////
+            
             nextPositions.set(turnoActual, nextObj);
-
+             
             //Mandar mensaje al vehículo
+            
             JsonObject response = Json.object();
 
+            System.out.println(nextObj.x + ","+ nextObj.y);
+            System.out.println(ANSI_RED + "No esta en el objetivo");
             response.add("next_pos", transformarMapPoint(nextObj));
+            
             System.out.println(response.toString());
 
             this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
@@ -242,7 +287,9 @@ public class AgentController extends Agent{
     }
     
     private void updateInfo(){
+        System.out.println(ANSI_RED+"esta en update info");
         for(int i = 0; i < cerrados.size(); i++){
+            //System.out.println(cerrados.get(i));
             ArrayList<AgentID> coincidencias = new ArrayList<>();
             if(!cerradosFinal.containsKey(cerrados.get(i))){                
                 cerradosFinal.put(cerrados.get(i), coincidencias);
@@ -256,8 +303,9 @@ public class AgentController extends Agent{
                     cerradosFinal.put(cerrados.get(i), coincidencias);
             }
         }
-        
+        //System.out.println("abiertos");
         for(int i = 0; i < abiertos.size(); i++){
+            //System.out.println(abiertos.get(i));
             if(!cerradosFinal.containsKey(abiertos.get(i))){
                 ArrayList<AgentID> coincidencias = new ArrayList<>();
                 if(!abiertosFinal.containsKey(abiertos.get(i))){                
@@ -293,16 +341,16 @@ public class AgentController extends Agent{
             for(int i = posicionVehiculoY-tamanio; i <= posicionVehiculoY+tamanio; i++)
                 for(int j = posicionVehiculoX-tamanio; j <= posicionVehiculoX+tamanio; j++){
                     if(mapa.get(i*m+j) ==0 && radar.get(index) ==1){
-                        if(DEBUG)
-                            System.out.println(ANSI_YELLOW+"SOBRESCRIBIENDO UN CERO CON UN UNO");
+                       // if(DEBUG)
+                           // System.out.println(ANSI_YELLOW+"SOBRESCRIBIENDO UN CERO CON UN UNO");
                     }
                     if(DEBUG)
-                        System.out.println(ANSI_YELLOW+radar.get(index));
+                        //System.out.println(ANSI_YELLOW+radar.get(index));
                     
                     mapa.set(i*m+j, radar.get(index));
                     if(mapa.get(i*m+j) == 0){
-                        if(DEBUG)
-                            System.out.println(ANSI_YELLOW+"PUESTOS 0");
+                       // if(DEBUG)
+                            //System.out.println(ANSI_YELLOW+"PUESTOS 0");
                     }
                     index+=1;
                 }
@@ -314,16 +362,20 @@ public class AgentController extends Agent{
         cerrados.clear();
         this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
         ArrayList<String> msg = this.receiveMessage();
-        
+        System.out.println(ANSI_RED + "recibe la info");
         String contenido = msg.get(3);
         
         JsonObject object = Json.parse(contenido).asObject();
+        System.out.println(ANSI_RED+contenido);
         JsonArray abiertosJson = object.get("abiertos").asArray();
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
         
         for(int i = 0; i < abiertosJson.size(); i++){
+            //System.out.println(abiertosJson.get(i).asInt());
             abiertos.add(abiertosJson.get(i).asInt());
         }
+        
+        
         
         JsonArray cerradosJson = object.get("cerrados").asArray();
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
@@ -332,14 +384,19 @@ public class AgentController extends Agent{
             cerrados.add(cerradosJson.get(i).asInt());
         }
         
+        for(int i=0; i < cerrados.size(); i++){
+            System.out.print(ANSI_RED + cerrados.get(i));
+        }
+        
         int pos_ = object.get("pos").asInt();
         MapPoint aux = iniciarMapPoint(pos_);
         posicionVehiculoX = aux.x;
         posicionVehiculoY = aux.y;
         
         MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
+        System.out.println(ANSI_RED+turnoActual);
         vehiclesPositions.set(turnoActual, pos);  // MAL
-        System.out.println(ANSI_RED + "recibe la info");
+        
         if(object.get("objetive_pos").asInt() != -1){
             this.objetivePos = object.get("objetive_pos").asInt();
         }
