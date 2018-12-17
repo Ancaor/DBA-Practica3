@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car11111111111111111";
-    String car2Agent_name = "car122211111121122";
-    String truckAgent_name = "truck1111111111111";
-    String dronAgent_name = "dron1111111111111";
+    String car1Agent_name = "car1111111111111111111";
+    String car2Agent_name = "car12221111111121122";
+    String truckAgent_name = "truck111111111111111";
+    String dronAgent_name = "dron111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -78,7 +78,7 @@ public class AgentController extends Agent{
     private int objetivePos;
     
     MapPoint nextObj;
-    private ArrayList<MapPoint> vehiclesPositions = new ArrayList<>(4);
+    private ArrayList<MapPoint> vehiclesPositions = new ArrayList<>(4); 
     private ArrayList<MapPoint> nextPositions = new ArrayList<>(4);    
 
     
@@ -338,7 +338,7 @@ public class AgentController extends Agent{
         posicionVehiculoY = aux.y;
         
         MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
-        vehiclesPositions.set(turnoActual, pos);
+        vehiclesPositions.set(turnoActual, pos);  // MAL
         System.out.println(ANSI_RED + "recibe la info");
         if(object.get("objetive_pos").asInt() != -1){
             this.objetivePos = object.get("objetive_pos").asInt();
