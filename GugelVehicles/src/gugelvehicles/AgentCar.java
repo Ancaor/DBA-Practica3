@@ -103,14 +103,14 @@ public class AgentCar extends Agent {
             
             JsonObject contenido = new JsonObject(); 
             contenido = Json.object().add("command","checkin");
-            
+            System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(this.serverAgent, contenido.toString(), ACLMessage.REQUEST, conversationID, "","");
             
             
             state=WAIT_SERVER_CHEKIN;
         }else if(performativa.equals("REQUEST") && content.contains("START")){
             System.out.println(ANSI_BLUE+ "Coche ya puede moverse");
-            state=REQUEST_WORLD_INFO;
+            state=WAIT_TURN;
         }else if(performativa.equals("REQUEST") && content.contains("RESET")){
             System.out.println(ANSI_BLUE+ "reinicio requerido");
             state= WAIT_CONTROLLER;
@@ -204,7 +204,9 @@ public class AgentCar extends Agent {
     private void requestWorldInfo() {
         
         System.out.println(ANSI_BLUE + "Solicita información del mundo");
-            
+        
+        
+        System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
         
         ArrayList<String> respuesta = this.receiveMessage();
@@ -212,6 +214,7 @@ public class AgentCar extends Agent {
         String performativa = respuesta.get(0);
         String conv_id = respuesta.get(1);
         String content = respuesta.get(3);
+        this.reply_with_server =  respuesta.get(2);
         
         System.out.println(performativa);
         System.out.println(ANSI_BLUE+content);
@@ -275,30 +278,32 @@ public class AgentCar extends Agent {
         information_package.add("objetive_pos", pos_objetivo);
         System.out.println(information_package.toString());
         System.out.println("-----POSICION VEHICULO: x:" + position%510 + " y:" + position/510);
-        this.state = WAIT_TURN;
+        this.state = WAIT_CONTROLLER_COMMAND;
         
         
     }
     
     private void waitTurn() {
         
-        JsonObject response = Json.object();
-        response.add("state", "IDLE");
+       // JsonObject response = Json.object();
+       // response.add("state", "IDLE");
         
-        this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
+       // this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
         System.out.println(ANSI_BLUE + "Esperando turno");
         ArrayList<String> message = this.receiveMessage();
         System.out.println(ANSI_BLUE + "tiene el turno");
         String performativa = message.get(0);
         
             
-        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-        state=WAIT_CONTROLLER_COMMAND;
+        //this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+        state=REQUEST_WORLD_INFO;
         
         
     }
     
     private void waitControllerCommand() {
+        
+        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
 
         ArrayList<String> controller_response = this.receiveMessage();
         
@@ -328,16 +333,19 @@ public class AgentCar extends Agent {
         
         JsonObject message = Json.object();
         
-        if(this.battery < UMBRAL_BATERIA){
+      //  if(this.battery < UMBRAL_BATERIA){
             message.add("command", "refuel");
+            System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
-        }else{
+       /* }else{
             
             message.add("command", this.next_pos);
             System.out.println(ANSI_BLUE + "MENSAJE ANTES DEL SEND: " + message.toString());
-            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
+            System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
+            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST , conversationID, this.reply_with_server, "");
+            
         }
-        
+        */
         ArrayList<String> response = this.receiveMessage();
         
         String performativa = response.get(0);
@@ -347,7 +355,14 @@ public class AgentCar extends Agent {
         System.out.println(ANSI_BLUE + "PERFORMATIVE SEND_COMMAND_TO_SERVER: " + performativa);
         System.out.println(ANSI_BLUE + "CONTENT SEND_COMMAND_TO_SERVER: " + content);
         
-        this.state = REQUEST_WORLD_INFO;
+        message = Json.object();
+        
+        message.add("state", "FIN_TURNO");
+        
+        
+        this.sendMessage(controllerAgent, message.toString(), ACLMessage.INFORM, conversationID, "", "");
+        
+        this.state = WAIT_TURN;
         
     }
     

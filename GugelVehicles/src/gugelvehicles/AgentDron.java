@@ -102,14 +102,14 @@ private ArrayList<Integer> radar = new ArrayList<>();
             
             JsonObject contenido = new JsonObject(); 
             contenido = Json.object().add("command","checkin");
-            
+            System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(this.serverAgent, contenido.toString(), ACLMessage.REQUEST, conversationID, "","");
             
             
             state=WAIT_SERVER_CHEKIN;
         }else if(performativa.equals("REQUEST") && content.contains("START")){
             System.out.println(ANSI_GREEN+ "Coche ya puede moverse");
-            state=REQUEST_WORLD_INFO;
+            state=WAIT_TURN;
         }else if(performativa.equals("REQUEST") && content.contains("RESET")){
             System.out.println(ANSI_GREEN+ "reinicio requerido");
             state= WAIT_CONTROLLER;
@@ -203,7 +203,7 @@ private ArrayList<Integer> radar = new ArrayList<>();
     private void requestWorldInfo() {
         
         System.out.println(ANSI_GREEN + "Solicita información del mundo");
-            
+            System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
         
         ArrayList<String> respuesta = this.receiveMessage();
@@ -273,27 +273,30 @@ private ArrayList<Integer> radar = new ArrayList<>();
         information_package.add("objetive_pos", pos_objetivo);
         System.out.println(information_package.toString());
         
-        this.state = WAIT_TURN;
+        this.state = WAIT_CONTROLLER_COMMAND;
         
         
     }
     
     private void waitTurn() {
         System.out.println(ANSI_GREEN + "esperando turno");
-        JsonObject response = Json.object();
-        response.add("state", "IDLE");
+        //JsonObject response = Json.object();
+        //response.add("state", "IDLE");
         
-        this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
+        
+       // this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
         ArrayList<String> message = this.receiveMessage();
+        System.out.println(ANSI_GREEN + "tiene el turno");
         String performativa = message.get(0);
         
-        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-        state=WAIT_CONTROLLER_COMMAND;
+        //this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+        state=REQUEST_WORLD_INFO;
         
         
     }
     
     private void waitControllerCommand() {
+        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
         System.out.println(ANSI_GREEN + "esperando comando de controlador");
         ArrayList<String> controller_response = this.receiveMessage();
         
@@ -323,10 +326,12 @@ private ArrayList<Integer> radar = new ArrayList<>();
         
         if(this.battery < UMBRAL_BATERIA){
             message.add("command", "refuel");
+            System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
         }else{
             
             message.add("command", this.netx_pos);
+            System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
         }
         
@@ -337,8 +342,14 @@ private ArrayList<Integer> radar = new ArrayList<>();
         
         System.out.println(performativa);
         System.out.println(content);
+        message = Json.object();
         
-        this.state = REQUEST_WORLD_INFO;
+        message.add("state", "FIN_TURNO");
+        
+        
+        this.sendMessage(controllerAgent, message.toString(), ACLMessage.INFORM, conversationID, "", "");
+        
+        this.state = WAIT_TURN;
         
     }
     

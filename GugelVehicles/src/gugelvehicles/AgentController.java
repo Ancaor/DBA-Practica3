@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car112221111111111111111111111111111111111111111111111111111111111111111111111111111111121122";
-    String truckAgent_name = "truc1k111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111111111111111111111111111111111111121122";
+    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -56,6 +56,7 @@ public class AgentController extends Agent{
     private static final int FINISH = 5;
     private static final int FINISH_ERROR=11;
     private static final int SEND_COMMAND = 6;
+    private static final int NEXT_ITERATION= 13;
     
     private int state;
     private AgentDron agentDron;
@@ -269,6 +270,8 @@ public class AgentController extends Agent{
 
             this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
                     "", "");
+            
+            
         }else{
             
             JsonObject response = Json.object();
@@ -286,7 +289,10 @@ public class AgentController extends Agent{
             turnoActual = 0;
         }
         
-        state = REQUEST_INFO;
+        this.receiveMessage(); // fin de turno
+        
+        
+        state = WAIT_IDLE;
     }
     
     private void updateInfo(){
@@ -306,7 +312,7 @@ public class AgentController extends Agent{
                     cerradosFinal.put(cerrados.get(i), coincidencias);
             }
         }
-        //System.out.println("abiertos");
+        //System.out.println(ANSI_RED+"abiertos");
         for(int i = 0; i < abiertos.size(); i++){
             //System.out.println(abiertos.get(i));
             if(!cerradosFinal.containsKey(abiertos.get(i))){
@@ -363,7 +369,7 @@ public class AgentController extends Agent{
     private void requestInfo(){
         abiertos.clear();
         cerrados.clear();
-        this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
+      //  this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
         ArrayList<String> msg = this.receiveMessage();
         System.out.println(ANSI_RED + "recibe la info");
         String contenido = msg.get(3);
@@ -411,33 +417,37 @@ public class AgentController extends Agent{
             radar.add(radarJson.get(i).asInt());
         }
         
-        System.out.println("RADAR RECIBIDO: " + radar.toString());
+        System.out.println(ANSI_RED+"RADAR RECIBIDO: " + radar.toString());
         
         this.state = UPDATE_INFO;
     }
     
     private void waitIdle(){
-        System.out.println(ANSI_RED + "Esperando idls");
-        ArrayList<String> msg1 = this.receiveMessage();
-        System.out.println(ANSI_RED + "tiene 1 idls");
+      //  System.out.println(ANSI_RED + "Esperando idls");
+      //  ArrayList<String> msg1 = this.receiveMessage();
+      /*  System.out.println(ANSI_RED + "tiene 1 idls");
         ArrayList<String> msg2 = this.receiveMessage();
         System.out.println(ANSI_RED + "tiene 2 idls");
         ArrayList<String> msg3 = this.receiveMessage();
         System.out.println(ANSI_RED + "tiene 3 idls");
         ArrayList<String> msg4 = this.receiveMessage();
         System.out.println(ANSI_RED + "tiene 4 idls");
-        
+        */
+      System.out.println(ANSI_RED+ "turno de: " + this.arrayVehiculos.get(this.turnoActual).getLocalName());
+      this.sendMessage(this.arrayVehiculos.get(this.turnoActual), "", ACLMessage.INFORM, conversationID, "", "");
+      
         state = REQUEST_INFO;
         if(DEBUG){
-            if(msg1.get(3).contains("IDLE") && msg2.get(3).contains("IDLE") 
-                    && msg3.get(3).contains("IDLE") && msg4.get(3).contains("IDLE")){       //Si contiene IDLE
-                System.out.println("Todos a IDLE");
-            }
+            //if(msg1.get(3).contains("IDLE") && msg2.get(3).contains("IDLE") 
+            //        && msg3.get(3).contains("IDLE") && msg4.get(3).contains("IDLE")){       //Si contiene IDLE
+            //    System.out.println(ANSI_RED+"Todos a IDLE");
+           // }
 
-            else{
-                System.out.println("Error en WAIT_IDLE");
-            }
+            //else{
+             //   System.out.println(ANSI_RED+"Error en WAIT_IDLE");
+            //}
         }
+        
     }
 
     private void finish() {
@@ -613,6 +623,17 @@ public class AgentController extends Agent{
         
     }
     
+    public void next_iteration(){
+        JsonObject contenido = new JsonObject(); 
+        contenido = Json.object().add("command","START");
+            
+        
+        this.sendMessage(this.car1Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.car1Agent_name+"_ejec");
+        
+    
+        state= WAIT_IDLE;
+    }
+    
     
      @Override
     public void execute(){
@@ -659,6 +680,10 @@ public class AgentController extends Agent{
 
                 case FINISH_ERROR:
                     finish_error();
+                break;
+                
+                case NEXT_ITERATION:
+                    next_iteration();
                 break;
                     
             }

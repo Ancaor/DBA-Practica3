@@ -9,6 +9,6 @@ package gugelvehicles;
  *
  * @author Anton
  */
-public interface Vehicle {
+public class Vehicle {
     
 }
