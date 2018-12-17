@@ -80,48 +80,7 @@ public class AgentCar extends Agent {
         state = WAIT_CONTROLLER;
     }
     
-    @Override
-    public void execute(){
-        while(!finish)
-        {
-            if(DEBUG)
-                System.out.println(ANSI_BLUE+"ESTADO_CAR : " + state);
-             
-            switch(state)
-            {
-                case WAIT_CONTROLLER:
-                    //state = LOGIN_AGENTS;
-                    wait_controller();
-                    break;
-               case WAIT_SERVER_CHEKIN:
-                    wait_server_chekin();
-                    break;
-                case REQUEST_WORLD_INFO:
-                    requestWorldInfo();
-                    break;
-
-                case WAIT_CONTROLLER_COMMAND:
-                    waitControllerCommand();
-                    break;
-
-                case FINISH:
-                    finish();
-                break;
-
-                case SEND_COMMAND_TO_SERVER:
-                    sendCommandToServer();
-                break;
-                
-                case WAIT_TURN:
-                    waitTurn();
-                break;
-                    
-            }
-            
-           
-        }
-       System.out.println(ANSI_BLUE+"------- CAR FINISHED -------");
-    }
+    
 
     private void wait_controller() {
         
@@ -447,6 +406,49 @@ public class AgentCar extends Agent {
         }
         
         return json;
+    }
+    
+    @Override
+    public void execute(){
+        while(!finish)
+        {
+            if(DEBUG)
+                System.out.println(ANSI_BLUE+"ESTADO_CAR : " + state);
+             
+            switch(state)
+            {
+                case WAIT_CONTROLLER:
+                    //state = LOGIN_AGENTS;
+                    wait_controller();
+                    break;
+               case WAIT_SERVER_CHEKIN:
+                    wait_server_chekin();
+                    break;
+                case REQUEST_WORLD_INFO:
+                    requestWorldInfo();
+                    break;
+
+                case WAIT_CONTROLLER_COMMAND:
+                    waitControllerCommand();
+                    break;
+
+                case FINISH:
+                    finish();
+                break;
+
+                case SEND_COMMAND_TO_SERVER:
+                    sendCommandToServer();
+                break;
+                
+                case WAIT_TURN:
+                    waitTurn();
+                break;
+                    
+            }
+            
+           
+        }
+       System.out.println(ANSI_BLUE+"------- CAR FINISHED -------");
     }
 
     

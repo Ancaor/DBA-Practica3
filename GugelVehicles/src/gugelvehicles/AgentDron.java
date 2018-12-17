@@ -6,10 +6,12 @@
 package gugelvehicles;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
+import static gugelvehicles.Agent.ANSI_BLUE;
 import static gugelvehicles.Agent.ANSI_GREEN;
 import java.util.ArrayList;
 
@@ -21,7 +23,7 @@ public class AgentDron extends Agent{
 
   
     
-    
+    private static final int UMBRAL_BATERIA = 70;
     
     private boolean finish = false;
     private final boolean DEBUG=true;
@@ -53,14 +55,21 @@ public class AgentDron extends Agent{
     private String reply_with_server;
     
     
-    private static final int WAIT_CONTROLLER = 0;
+     private static final int WAIT_CONTROLLER = 0;
     private static final int WAIT_SERVER_CHEKIN = 1;
     private static final int REQUEST_WORLD_INFO = 2;
-   // private static final int REQUEST_CHECKIN = 2;
-   // private static final int WAIT_CHECKIN = 3;
+    private static final int WAIT_CONTROLLER_COMMAND = 3;
+    private static final int SEND_COMMAND_TO_SERVER = 4;
     private static final int FINISH = 5;
+    private static final int  WAIT_TURN = 6;
    // private static final int SEND_COMMAND = 6;
     private String conversationID;
+    private int enery;
+    private boolean goal;
+    private int position;
+    private String netx_pos;
+    
+    private JsonObject information_package;
     
     public AgentDron(AgentID aid,AgentID serverID, AgentID controllerID) throws Exception {
         super(aid);
@@ -72,48 +81,6 @@ public class AgentDron extends Agent{
         state = WAIT_CONTROLLER;
     }
     
-    @Override
-    public void execute(){
-        while(!finish)
-        {
-            if(DEBUG)
-                System.out.println(ANSI_GREEN+"ESTADO_DRON : " + state);
-             
-            switch(state)
-            {
-                case WAIT_CONTROLLER:
-                    //state = LOGIN_AGENTS;
-                    wait_controller();
-                    break;
-               case WAIT_SERVER_CHEKIN:
-                    wait_server_chekin();
-                    break;
-                    
-                    case REQUEST_WORLD_INFO:
-                    requestWorldInfo();
-                    break;
-         /*       case REQUEST_CHECKIN:
-                    requestCheckin();
-                    break;
-
-                case WAIT_CHECKIN:
-                    waitCheckin();
-                    break;
-
-           */     case FINISH:
-                    finish();
-                break;
-/*
-                case SEND_COMMAND:
-                    sendCommand();
-                break;
-                    */
-            }
-            
-           
-        }
-       System.out.println(ANSI_GREEN+"------- DRON FINISHED -------");
-    }
 
     private void wait_controller() {
         
@@ -232,6 +199,7 @@ public class AgentDron extends Agent{
         return check;
     }
     
+   
     private void requestWorldInfo() {
         
         System.out.println(ANSI_BLUE + "Solicita información del mundo");
@@ -249,9 +217,236 @@ public class AgentDron extends Agent{
         System.out.println(conv_id);
         System.out.println(reply_with_server);
         
-        this.sendMessage(controllerAgent, content, fuelrate, conversationID, content, content);
+        JsonObject object = Json.parse(content).asObject();
         
-        state=FINISH;
+        JsonObject result = object.get("result").asObject();
+        
+        this.battery = result.get("battery").asInt();
+        System.out.println("bateria " + this.battery);
+        this.x = result.get("x").asInt()+5;
+        this.y = result.get("y").asInt()+5;
+        this.position = this.x + (this.y * 510);
+        System.out.println("x " + this.x + " y "+ this.y);
+        JsonArray aux = result.get("sensor").asArray();
+        
+        for(int i=0; i < aux.size();i++){
+            this.radar.add(aux.get(i).asInt());
+        }
+        
+        for(int i=0; i < radar.size(); i++){
+                
+            System.out.print(radar.get(i));
+            if((i+1)%this.range == 0)
+                System.out.print("\n");
+        }
+        
+        this.enery = result.get("energy").asInt();
+        this.goal = result.get("goal").asBoolean();
+        
+        
+        ArrayList<Integer> abiertos = calcularAbiertos();
+        System.out.println("abiertos");
+        for(int i=0; i < abiertos.size(); i++){
+            System.out.println(abiertos.get(i));
+        }
+        ArrayList<Integer> cerrados = calcularCerrados();
+        System.out.println("cerrados");
+        for(int i=0; i < cerrados.size(); i++){
+            System.out.println(cerrados.get(i));
+        }
+        
+        int pos_objetivo = obtenerPosObjetivo();
+        System.out.println("pos_objetivo");
+        System.out.println(pos_objetivo);
+        
+        
+        information_package = Json.object();
+        //JsonArray abiertos_json = Json.array();
+        
+        
+        
+        information_package.add("radar", this.convertToJson(radar));
+        information_package.add("abiertos", this.convertToJson(abiertos));
+        information_package.add("cerrados", this.convertToJson(cerrados));
+        information_package.add("pos", this.position );
+        information_package.add("objetive_pos", pos_objetivo);
+        System.out.println(information_package.toString());
+        
+        this.state = WAIT_TURN;
+        
         
     }
+    
+    private void waitTurn() {
+        JsonObject response = Json.object();
+        response.add("state", "IDLE");
+        
+        this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
+        ArrayList<String> message = this.receiveMessage();
+        String performativa = message.get(0);
+        
+        if(performativa.equals("QUERY_REF")){
+            
+            this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+            state=WAIT_CONTROLLER_COMMAND;
+        }
+        
+    }
+    
+    private void waitControllerCommand() {
+
+        ArrayList<String> controller_response = this.receiveMessage();
+        
+        String performativa = controller_response.get(0);
+        String content = controller_response.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(content);
+        
+        if(performativa.equals("REQUEST")){
+            JsonObject json_content = Json.parse(content).asObject();
+            
+            if(!json_content.getString("next_pos", "unknown").equals("unknown")){ // Si tiene next_pos
+                this.netx_pos = json_content.getString("next_pos","unknown");
+                this.state = SEND_COMMAND_TO_SERVER;
+            }else{                                         // Si tiene "command" FINISH
+                this.state= FINISH;
+            }
+        }
+
+    }
+    
+    private void sendCommandToServer() {
+        
+        JsonObject message = Json.object();
+        
+        if(this.battery < UMBRAL_BATERIA){
+            message.add("command", "refuel");
+            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
+        }else{
+            
+            message.add("command", this.netx_pos);
+            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
+        }
+        
+        ArrayList<String> response = this.receiveMessage();
+        
+        String performativa = response.get(0);
+        String content = response.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(content);
+        
+        this.state = REQUEST_WORLD_INFO;
+        
+    }
+    
+    public ArrayList<Integer> calcularAbiertos(){
+        ArrayList<Integer> abiertos = new ArrayList<>();
+        
+        for(int i=0; i<this.range; i++)
+            abiertos.add(this.radar.get(i));
+        
+        for(int i=1; i < this.range-1; i++){
+            abiertos.add(this.radar.get(this.range*i));
+            abiertos.add(this.radar.get((this.range*(i+1))-1));
+        }
+        
+        for(int i=0; i < this.range; i++){
+            abiertos.add(this.radar.get((this.range*(this.range-1))+i));
+        }
+        
+        
+        return abiertos;
+    }
+    
+    public ArrayList<Integer> calcularCerrados(){
+        ArrayList<Integer> cerrados = new ArrayList<>();
+        
+        
+        for(int i=1; i < this.range-1; i++){
+            for(int j=1; j < this.range-1; j++){
+                cerrados.add(this.radar.get((this.range*i)+j));
+            }
+            
+        }
+        
+         
+        return cerrados;
+    }
+
+    private int obtenerPosObjetivo() {
+        int posObjetivo = -1;
+        
+        int x = this.x-((this.range-1)/2);
+        int y = this.y-((this.range-1)/2);
+        
+        for(int i=0; i < this.radar.size(); i++){
+            
+            if(this.radar.get(i) == 3){
+                posObjetivo = x + (y*510);
+            }
+            
+            if(i%this.range == 0 && i!= 0){
+                x = this.x-((this.range-1)/2);
+                y++;
+            }else{
+                x++;
+            }
+        }
+        
+        return posObjetivo;
+    }
+    
+    private JsonArray convertToJson(ArrayList<Integer> array){
+        JsonArray json = Json.array();
+        
+        for(int i=0; i < array.size(); i++){
+            json.add(array.get(i));
+        }
+        
+        return json;
+    }
+    
+    @Override
+    public void execute(){
+        while(!finish)
+        {
+            if(DEBUG)
+                System.out.println(ANSI_GREEN+"ESTADO_DRON : " + state);
+             
+            switch(state)
+            {
+                case WAIT_CONTROLLER:
+                    //state = LOGIN_AGENTS;
+                    wait_controller();
+                    break;
+               case WAIT_SERVER_CHEKIN:
+                    wait_server_chekin();
+                    break;
+                case REQUEST_WORLD_INFO:
+                    requestWorldInfo();
+                    break;
+
+                case WAIT_CONTROLLER_COMMAND:
+                    waitControllerCommand();
+                    break;
+
+                case FINISH:
+                    finish();
+                break;
+
+                case SEND_COMMAND_TO_SERVER:
+                    sendCommandToServer();
+                break;
+                
+                case WAIT_TURN:
+                    waitTurn();
+                break;
+                    
+            }
+            
+           
+        }
+    System.out.println(ANSI_GREEN+"------- DRON FINISHED -------");    }
 }
