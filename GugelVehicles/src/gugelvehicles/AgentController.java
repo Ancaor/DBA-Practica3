@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car111111111111111111111111111111111111111111";
-    String car2Agent_name = "car1122211111111111111111111111111111121122";
-    String truckAgent_name = "truc1k1111111111111111111111111111111111111";
-    String dronAgent_name = "dron11111111111111111111111111111111111111";
+    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111121122";
+    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -244,8 +244,9 @@ public class AgentController extends Agent{
             System.out.println(finish);
             
             for(int i=0; i < abi.size(); i++){
-                
+                System.out.println(mapa.get(abi.get(i)));
             }
+            
             
             nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
 
@@ -347,7 +348,7 @@ public class AgentController extends Agent{
                     if(DEBUG)
                         //System.out.println(ANSI_YELLOW+radar.get(index));
                     
-                    mapa.set(i*m+j, radar.get(index));
+                    mapa.set(j*m+i, radar.get(index));
                     if(mapa.get(i*m+j) == 0){
                        // if(DEBUG)
                             //System.out.println(ANSI_YELLOW+"PUESTOS 0");

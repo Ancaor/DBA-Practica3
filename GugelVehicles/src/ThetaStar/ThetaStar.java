@@ -87,7 +87,7 @@ public class ThetaStar {
                     }
                     
                     
-                    if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1)){
+                    if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 2)){
                        Node adjNode = new Node(adjPoint,currentNode);
                        adjNode.calculateValues(goal);
                  //      System.out.println("ENTRA EN IF: " + this.map_real.get(adjPoint.y * this.width + adjPoint.x));
