@@ -49,17 +49,24 @@ public class AgentCar extends Agent {
     private String reply_with_controller;
     private String reply_with_server;
     
+    private static final int UMBRAL_BATERIA = 70;
+    
     
     private static final int WAIT_CONTROLLER = 0;
     private static final int WAIT_SERVER_CHEKIN = 1;
     private static final int REQUEST_WORLD_INFO = 2;
-   // private static final int WAIT_CHECKIN = 3;
+    private static final int WAIT_CONTROLLER_COMMAND = 3;
+    private static final int SEND_COMMAND_TO_SERVER = 4;
     private static final int FINISH = 5;
+    private static final int  WAIT_TURN = 6;
    // private static final int SEND_COMMAND = 6;
     private String conversationID;
     private int enery;
     private boolean goal;
     private int position;
+    private String netx_pos;
+    
+    private JsonObject information_package;
     
     
     public AgentCar(AgentID aid, AgentID serverID, AgentID controllerID) throws Exception {
@@ -93,18 +100,22 @@ public class AgentCar extends Agent {
                     requestWorldInfo();
                     break;
 
-         /*       case WAIT_CHECKIN:
-                    waitCheckin();
+                case WAIT_CONTROLLER_COMMAND:
+                    waitControllerCommand();
                     break;
 
-           */     case FINISH:
+                case FINISH:
                     finish();
                 break;
-/*
-                case SEND_COMMAND:
-                    sendCommand();
+
+                case SEND_COMMAND_TO_SERVER:
+                    sendCommandToServer();
                 break;
-                    */
+                
+                case WAIT_TURN:
+                    waitTurn();
+                break;
+                    
             }
             
            
@@ -290,25 +301,85 @@ public class AgentCar extends Agent {
         System.out.println(pos_objetivo);
         
         
-        JsonObject response = Json.object();
+        information_package = Json.object();
         //JsonArray abiertos_json = Json.array();
         
         
         
-        response.add("radar", this.convertToJson(radar));
-        response.add("abiertos", this.convertToJson(abiertos));
-        response.add("cerrados", this.convertToJson(cerrados));
-        response.add("pos", this.position );
-        response.add("objetive_pos", pos_objetivo);
-        System.out.println(response.toString());
+        information_package.add("radar", this.convertToJson(radar));
+        information_package.add("abiertos", this.convertToJson(abiertos));
+        information_package.add("cerrados", this.convertToJson(cerrados));
+        information_package.add("pos", this.position );
+        information_package.add("objetive_pos", pos_objetivo);
+        System.out.println(information_package.toString());
+        
+        this.state = WAIT_TURN;
         
         
-        //PROVISIONAL
-        //////////////////
-        this.sendMessage(controllerAgent, content, fuelrate, conversationID, content, content);
+    }
+    
+    private void waitTurn() {
+        JsonObject response = Json.object();
+        response.add("state", "IDLE");
         
-        state=FINISH;
-        ///////////////7
+        this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
+        ArrayList<String> message = this.receiveMessage();
+        String performativa = message.get(0);
+        
+        if(performativa.equals("QUERY_REF")){
+            
+            this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+            state=WAIT_CONTROLLER_COMMAND;
+        }
+        
+    }
+    
+    private void waitControllerCommand() {
+
+        ArrayList<String> controller_response = this.receiveMessage();
+        
+        String performativa = controller_response.get(0);
+        String content = controller_response.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(content);
+        
+        if(performativa.equals("REQUEST")){
+            JsonObject json_content = Json.parse(content).asObject();
+            
+            if(!json_content.getString("next_pos", "unknown").equals("unknown")){ // Si tiene next_pos
+                this.netx_pos = json_content.getString("next_pos","unknown");
+                this.state = SEND_COMMAND_TO_SERVER;
+            }else{                                         // Si tiene "command" FINISH
+                this.state= FINISH;
+            }
+        }
+
+    }
+    
+    private void sendCommandToServer() {
+        
+        JsonObject message = Json.object();
+        
+        if(this.battery < UMBRAL_BATERIA){
+            message.add("command", "refuel");
+            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
+        }else{
+            
+            message.add("command", this.netx_pos);
+            this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
+        }
+        
+        ArrayList<String> response = this.receiveMessage();
+        
+        String performativa = response.get(0);
+        String content = response.get(3);
+        
+        System.out.println(performativa);
+        System.out.println(content);
+        
+        this.state = REQUEST_WORLD_INFO;
+        
     }
     
     public ArrayList<Integer> calcularAbiertos(){
@@ -377,5 +448,11 @@ public class AgentCar extends Agent {
         
         return json;
     }
+
+    
+
+    
+
+    
 
 }
