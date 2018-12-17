@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car11111111";
-    String car2Agent_name = "car122222";
-    String truckAgent_name = "truck1111";
-    String dronAgent_name = "dron1111";
+    String car1Agent_name = "car11111111111111111";
+    String car2Agent_name = "car122211111121122";
+    String truckAgent_name = "truck1111111111111";
+    String dronAgent_name = "dron1111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -54,7 +54,7 @@ public class AgentController extends Agent{
     private static final int UPDATE_INFO = 8;
     private static final int SELECT_POSITION = 9;
     private static final int FINISH = 5;
-    private static final int FINISH_ERROR=8;
+    private static final int FINISH_ERROR=11;
     private static final int SEND_COMMAND = 6;
     
     private int state;
@@ -314,6 +314,7 @@ public class AgentController extends Agent{
         cerrados.clear();
         this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
         ArrayList<String> msg = this.receiveMessage();
+        
         String contenido = msg.get(3);
         
         JsonObject object = Json.parse(contenido).asObject();
@@ -331,17 +332,18 @@ public class AgentController extends Agent{
             cerrados.add(cerradosJson.get(i).asInt());
         }
         
-        posicionVehiculoX = object.get("posX").asInt();
-        posicionVehiculoY = object.get("posY").asInt();
+        int pos_ = object.get("pos").asInt();
+        MapPoint aux = iniciarMapPoint(pos_);
+        posicionVehiculoX = aux.x;
+        posicionVehiculoY = aux.y;
         
         MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
-        
         vehiclesPositions.set(turnoActual, pos);
-        
-        if(object.get("objetive_pos") == null){
+        System.out.println(ANSI_RED + "recibe la info");
+        if(object.get("objetive_pos").asInt() != -1){
             this.objetivePos = object.get("objetive_pos").asInt();
         }
-
+        
         JsonArray radarJson = object.get("radar").asArray();
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
         
@@ -355,10 +357,15 @@ public class AgentController extends Agent{
     }
     
     private void waitIdle(){
+        System.out.println(ANSI_RED + "Esperando idls");
         ArrayList<String> msg1 = this.receiveMessage();
+        System.out.println(ANSI_RED + "tiene 1 idls");
         ArrayList<String> msg2 = this.receiveMessage();
+        System.out.println(ANSI_RED + "tiene 2 idls");
         ArrayList<String> msg3 = this.receiveMessage();
+        System.out.println(ANSI_RED + "tiene 3 idls");
         ArrayList<String> msg4 = this.receiveMessage();
+        System.out.println(ANSI_RED + "tiene 4 idls");
         
         state = REQUEST_INFO;
         if(DEBUG){
@@ -524,7 +531,7 @@ public class AgentController extends Agent{
             this.sendMessage(this.truckAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.truckAgent_name+"_ejec");
             this.sendMessage(this.dronAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"", this.dronAgent_name+"_ejec");
             
-            this.state = FINISH;
+            this.state = WAIT_IDLE;
         }else{
             
             contenido = Json.object().add("command","RESET");
@@ -589,11 +596,11 @@ public class AgentController extends Agent{
                 case FINISH:
                     finish();
                 break;
-/*
-                case SEND_COMMAND:
-                    sendCommand();
+
+                case FINISH_ERROR:
+                    finish_error();
                 break;
-                    */
+                    
             }
             
            
@@ -601,4 +608,36 @@ public class AgentController extends Agent{
        System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
     }
     
+    public void finish_error(){ 
+        this.finish=true; 
+         
+        this.sendMessage(this.serverAgent, "", ACLMessage.CANCEL, "","", ""); 
+         
+        ArrayList<String> agree = this.receiveMessage(); 
+        System.out.println(agree.get(0)); 
+        ArrayList<String> mensaje_traza = this.receiveMessage(); 
+         
+        BufferedImage im = null; 
+        try{ 
+                System.out.println(ANSI_RED+"Recibiendo traza ..."); 
+ 
+                JsonObject injson = Json.parse(mensaje_traza.get(3)).asObject(); 
+ 
+                JsonArray array = injson.get("trace").asArray(); 
+                byte data[] = new byte[array.size()]; 
+                for(int i = 0; i<data.length; i++) 
+                    data[i] = (byte) array.get(i).asInt(); 
+ 
+                FileOutputStream fos  = new FileOutputStream("mitraza.png"); 
+                fos.write(data); 
+                fos.close(); 
+ 
+                 im = ImageIO.read(new File("mitraza.png")); 
+                 
+                System.out.println(ANSI_RED+"TAMANIO MAPA: " + im.getWidth()); 
+                System.out.println(ANSI_RED+"Traza guardada"); 
+            }catch(IOException ex){ 
+                System.out.println(ANSI_RED+"Error procesando traza"); 
+            } 
+    } 
 }

@@ -46,7 +46,7 @@ public class AgentTruck extends Agent{
     private int battery;
     private int x;
     private int y;
-    private ArrayList<Integer> radar;
+    private ArrayList<Integer> radar = new ArrayList<>();
     
     //
     
@@ -107,7 +107,7 @@ public class AgentTruck extends Agent{
             
             state=WAIT_SERVER_CHEKIN;
         }else if(performativa.equals("REQUEST") && content.contains("START")){
-            System.out.println(ANSI_PURPLE+ "Coche ya puede moverse");
+            System.out.println(ANSI_PURPLE+ "camion ya puede moverse");
             state=REQUEST_WORLD_INFO;
         }else if(performativa.equals("REQUEST") && content.contains("RESET")){
             System.out.println(ANSI_PURPLE+ "reinicio requerido");
@@ -202,20 +202,20 @@ public class AgentTruck extends Agent{
     
     private void requestWorldInfo() {
         
-        System.out.println(ANSI_BLUE + "Solicita información del mundo");
+        System.out.println(ANSI_PURPLE + "Solicita información del mundo");
             
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
-        
+        System.out.println(ANSI_PURPLE + "espera información del mundo");
         ArrayList<String> respuesta = this.receiveMessage();
-        
+        System.out.println(ANSI_PURPLE + "información del mundo recibida");
         String performativa = respuesta.get(0);
         String conv_id = respuesta.get(1);
         String content = respuesta.get(3);
         
-        System.out.println(performativa);
-        System.out.println(ANSI_BLUE+content);
-        System.out.println(conv_id);
-        System.out.println(reply_with_server);
+        System.out.println(ANSI_PURPLE+performativa);
+        System.out.println(ANSI_PURPLE+content);
+        System.out.println(ANSI_PURPLE+conv_id);
+        System.out.println(ANSI_PURPLE+reply_with_server);
         
         JsonObject object = Json.parse(content).asObject();
         
@@ -227,9 +227,13 @@ public class AgentTruck extends Agent{
         this.y = result.get("y").asInt()+5;
         this.position = this.x + (this.y * 510);
         System.out.println("x " + this.x + " y "+ this.y);
+        
         JsonArray aux = result.get("sensor").asArray();
         
+        
+        
         for(int i=0; i < aux.size();i++){
+            
             this.radar.add(aux.get(i).asInt());
         }
         
@@ -242,7 +246,6 @@ public class AgentTruck extends Agent{
         
         this.enery = result.get("energy").asInt();
         this.goal = result.get("goal").asBoolean();
-        
         
         ArrayList<Integer> abiertos = calcularAbiertos();
         System.out.println("abiertos");
@@ -264,7 +267,6 @@ public class AgentTruck extends Agent{
         //JsonArray abiertos_json = Json.array();
         
         
-        
         information_package.add("radar", this.convertToJson(radar));
         information_package.add("abiertos", this.convertToJson(abiertos));
         information_package.add("cerrados", this.convertToJson(cerrados));
@@ -274,10 +276,11 @@ public class AgentTruck extends Agent{
         
         this.state = WAIT_TURN;
         
-        
     }
     
     private void waitTurn() {
+                System.out.println(ANSI_PURPLE + "esperando turno");
+
         JsonObject response = Json.object();
         response.add("state", "IDLE");
         
@@ -285,15 +288,16 @@ public class AgentTruck extends Agent{
         ArrayList<String> message = this.receiveMessage();
         String performativa = message.get(0);
         
-        if(performativa.equals("QUERY_REF")){
+       
             
-            this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-            state=WAIT_CONTROLLER_COMMAND;
-        }
+        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+        state=WAIT_CONTROLLER_COMMAND;
+        
         
     }
     
     private void waitControllerCommand() {
+                System.out.println(ANSI_PURPLE + "esperando comando");
 
         ArrayList<String> controller_response = this.receiveMessage();
         
@@ -317,7 +321,8 @@ public class AgentTruck extends Agent{
     }
     
     private void sendCommandToServer() {
-        
+                System.out.println(ANSI_PURPLE + "enviando comando a server");
+
         JsonObject message = Json.object();
         
         if(this.battery < UMBRAL_BATERIA){

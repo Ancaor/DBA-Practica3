@@ -47,8 +47,7 @@ public class AgentDron extends Agent{
     private int battery;
     private int x;
     private int y;
-    private ArrayList<Integer> radar;
-    
+private ArrayList<Integer> radar = new ArrayList<>();    
     //
     
     private String reply_with_controller;
@@ -202,7 +201,7 @@ public class AgentDron extends Agent{
    
     private void requestWorldInfo() {
         
-        System.out.println(ANSI_BLUE + "Solicita información del mundo");
+        System.out.println(ANSI_GREEN + "Solicita información del mundo");
             
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
         
@@ -212,10 +211,10 @@ public class AgentDron extends Agent{
         String conv_id = respuesta.get(1);
         String content = respuesta.get(3);
         
-        System.out.println(performativa);
-        System.out.println(ANSI_BLUE+content);
-        System.out.println(conv_id);
-        System.out.println(reply_with_server);
+        System.out.println(ANSI_GREEN+performativa);
+        System.out.println(ANSI_GREEN+content);
+        System.out.println(ANSI_GREEN+conv_id);
+        System.out.println(ANSI_GREEN+reply_with_server);
         
         JsonObject object = Json.parse(content).asObject();
         
@@ -278,6 +277,7 @@ public class AgentDron extends Agent{
     }
     
     private void waitTurn() {
+        System.out.println(ANSI_GREEN + "esperando turno");
         JsonObject response = Json.object();
         response.add("state", "IDLE");
         
@@ -285,16 +285,14 @@ public class AgentDron extends Agent{
         ArrayList<String> message = this.receiveMessage();
         String performativa = message.get(0);
         
-        if(performativa.equals("QUERY_REF")){
-            
-            this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-            state=WAIT_CONTROLLER_COMMAND;
-        }
+        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+        state=WAIT_CONTROLLER_COMMAND;
+        
         
     }
     
     private void waitControllerCommand() {
-
+        System.out.println(ANSI_GREEN + "esperando comando de controlador");
         ArrayList<String> controller_response = this.receiveMessage();
         
         String performativa = controller_response.get(0);
@@ -317,7 +315,7 @@ public class AgentDron extends Agent{
     }
     
     private void sendCommandToServer() {
-        
+        System.out.println(ANSI_GREEN + "enviando comando al server");
         JsonObject message = Json.object();
         
         if(this.battery < UMBRAL_BATERIA){

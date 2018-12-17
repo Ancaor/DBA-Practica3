@@ -278,18 +278,20 @@ public class AgentCar extends Agent {
     }
     
     private void waitTurn() {
+        
         JsonObject response = Json.object();
         response.add("state", "IDLE");
         
         this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
+        System.out.println(ANSI_BLUE + "Esperando turno");
         ArrayList<String> message = this.receiveMessage();
+        System.out.println(ANSI_BLUE + "tiene el turno");
         String performativa = message.get(0);
         
-        if(performativa.equals("QUERY_REF")){
             
-            this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-            state=WAIT_CONTROLLER_COMMAND;
-        }
+        this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
+        state=WAIT_CONTROLLER_COMMAND;
+        
         
     }
     
