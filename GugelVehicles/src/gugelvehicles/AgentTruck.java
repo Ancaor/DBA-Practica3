@@ -307,7 +307,8 @@ public class AgentTruck extends Agent{
         
         System.out.println(performativa);
         System.out.println(content);
-        
+        System.out.println(ANSI_BLUE + "RECIBE MENSAJE COMMAND " + this.getAid());
+                
         if(performativa.equals("REQUEST")){
             JsonObject json_content = Json.parse(content).asObject();
             

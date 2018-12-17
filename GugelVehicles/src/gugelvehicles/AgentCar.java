@@ -64,7 +64,7 @@ public class AgentCar extends Agent {
     private int enery;
     private boolean goal;
     private int position;
-    private String netx_pos;
+    private String next_pos;
     
     private JsonObject information_package;
     private ArrayList<Integer> posiciones_Radar;
@@ -308,12 +308,15 @@ public class AgentCar extends Agent {
         System.out.println(performativa);
         System.out.println(content);
         
+        System.out.println(ANSI_BLUE + "RECIBE MENSAJE COMMAND"  + this.getAid());
+                
         if(performativa.equals("REQUEST")){
             JsonObject json_content = Json.parse(content).asObject();
             
             if(!json_content.getString("next_pos", "unknown").equals("unknown")){ // Si tiene next_pos
-                this.netx_pos = json_content.getString("next_pos","unknown");
+                this.next_pos = json_content.getString("next_pos","unknown");
                 this.state = SEND_COMMAND_TO_SERVER;
+                System.out.println(ANSI_BLUE + "Contenido next_pos: " + next_pos);
             }else{                                         // Si tiene "command" FINISH
                 this.state= FINISH;
             }
@@ -330,7 +333,8 @@ public class AgentCar extends Agent {
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
         }else{
             
-            message.add("command", this.netx_pos);
+            message.add("command", this.next_pos);
+            System.out.println(ANSI_BLUE + "MENSAJE ANTES DEL SEND: " + message.toString());
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
         }
         
@@ -339,8 +343,9 @@ public class AgentCar extends Agent {
         String performativa = response.get(0);
         String content = response.get(3);
         
-        System.out.println(performativa);
-        System.out.println(content);
+        System.out.println(ANSI_BLUE + "CONVERSATIONID SEND_COMMAND_TO_SERVER: " + conversationID);
+        System.out.println(ANSI_BLUE + "PERFORMATIVE SEND_COMMAND_TO_SERVER: " + performativa);
+        System.out.println(ANSI_BLUE + "CONTENT SEND_COMMAND_TO_SERVER: " + content);
         
         this.state = REQUEST_WORLD_INFO;
         
