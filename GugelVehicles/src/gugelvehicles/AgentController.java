@@ -128,58 +128,7 @@ public class AgentController extends Agent{
             mapa.add(2);
     }
     
-    @Override
-    public void execute(){
-        while(!finish)
-        {
-            if(DEBUG)
-                System.out.println(ANSI_RED+"ESTADO_CONTROLLER : " + state);
-             
-            switch(state)
-            {
-                case SUSCRIBE:
-                    //state = LOGIN_AGENTS;
-                    suscribe();
-                    break;
-                case AWAKE_AGENTS:
-                    awakeAgents();
-                    break;
-                case REQUEST_CHECKIN:
-                    requestCheckin();
-                    break;
-
-                case WAIT_CHECKIN:
-                    waitCheckin();
-                    break;
-
-                case WAIT_IDLE:
-                    waitIdle();
-                    break;
-                
-                case REQUEST_INFO:
-                    requestInfo();
-                    break;
-                    
-                case UPDATE_INFO:
-                    updateInfo();
-                    break;
-                case SELECT_POSITION:
-                    selectPosition();
-                    break;    
-                case FINISH:
-                    finish();
-                break;
-/*
-                case SEND_COMMAND:
-                    sendCommand();
-                break;
-                    */
-            }
-            
-           
-        }
-       System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
-    }
+   
     public MapPoint iniciarMapPoint(int a){
         int x = a/tamanio_mapa;
         int y = a%tamanio_mapa;
@@ -187,53 +136,101 @@ public class AgentController extends Agent{
         return resultado;
     }
     
-    public int transformarMapPoint(MapPoint m){
-        return m.x+m.y*tamanio_mapa;
+    public String transformarMapPoint(MapPoint m){
+        
+        if(m.y < this.posicionVehiculoY && m.x < this.posicionVehiculoX)
+            return "moveNW";
+        else if(m.y < this.posicionVehiculoY && m.x == this.posicionVehiculoX)
+            return "moveN"; 
+        else if(m.y < this.posicionVehiculoY && m.x > this.posicionVehiculoX)
+            return "moveNE";
+        else if(m.y == this.posicionVehiculoY && m.x < this.posicionVehiculoX)
+            return "moveW";
+        else if(m.y == this.posicionVehiculoY && m.x > this.posicionVehiculoX)
+            return "moveE";
+        else if(m.y > this.posicionVehiculoY && m.x < this.posicionVehiculoX)        
+            return "moveSW";   
+        else if(m.y > this.posicionVehiculoY && m.x == this.posicionVehiculoX)        
+            return "moveS";    
+        else      
+            return "moveSE";     
+        
     }
    
     public double distance(MapPoint p1, MapPoint p2){
         int xValue = (p1.x-p2.x)*(p1.x-p2.x);
         int yValue = (p1.y-p2.y)*(p1.y-p2.y);
         return Math.sqrt(xValue+yValue);
-    } 
+    }
+    
+    private boolean IsOnObjetive(){
+    
+        if(radar.size() == 9){
+            if(radar.get(4) == 3)
+                return true;
+            else
+                return false;
+        }
+        else if(radar.size() == 25){
+             if(radar.get(12) == 3)
+                return true;
+            else
+                return false;
+        }    
+        else{
+             if(radar.get(60) == 3)
+                return true;
+            else
+                return false;
+        }
+    }
     
     private void selectPosition(){
-        Objetivo proxObj = new Objetivo();
-               
-        ArrayList<Integer> abi = new ArrayList<>();
-        ArrayList<Integer> cer = new ArrayList<>();
         
-        for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
-            if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
-                abi.add(entry.getKey());
-            }
-        }
+        if(!this.IsOnObjetive()){
+            Objetivo proxObj = new Objetivo();
 
-        ArrayList<MapPoint> posOcupadas = new ArrayList<>();
-        for(int i = 0; i < vehiclesPositions.size(); i++){
-            if(vehiclesPositions.get(i) != new MapPoint(posicionVehiculoX, posicionVehiculoY)){
-                posOcupadas.add(vehiclesPositions.get(i));
+            ArrayList<Integer> abi = new ArrayList<>();
+            ArrayList<Integer> cer = new ArrayList<>();
+
+            for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
+                if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
+                    abi.add(entry.getKey());
+                }
             }
+
+            ArrayList<MapPoint> posOcupadas = new ArrayList<>();
+            for(int i = 0; i < vehiclesPositions.size(); i++){
+                if(vehiclesPositions.get(i) != new MapPoint(posicionVehiculoX, posicionVehiculoY)){
+                    posOcupadas.add(vehiclesPositions.get(i));
+                }
+
+                posOcupadas.add(nextPositions.get(i));
+            }
+
+            nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
+
+            nextPositions.set(turnoActual, nextObj);
+
+            //Mandar mensaje al vehículo
+            JsonObject response = Json.object();
+
+            response.add("next_pos", transformarMapPoint(nextObj));
+            System.out.println(response.toString());
+
+            this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
+                    "", "");
+        }else{
             
-            posOcupadas.add(nextPositions.get(i));
+            JsonObject response = Json.object();
+
+            response.add("command", "FINISH");
+            
+            this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
+                    "", "");
         }
-        
-        nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
-        
-        nextPositions.set(turnoActual, nextObj);
-        
-        //Mandar mensaje al vehículo
-        JsonObject response = Json.object();
-  
-        
-        response.add("next_pos", transformarMapPoint(nextObj));
-        System.out.println(response.toString());
-        
-        this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
-                "", response.toString());
 
-
-        if(turnoActual < arrayVehiculos.size()-1){
+        if(turnoActual < arrayVehiculos.size()){
             turnoActual++;
         }
         else{
@@ -539,6 +536,61 @@ public class AgentController extends Agent{
             this.state = SUSCRIBE;
         }
         
+    }
+    
+    
+     @Override
+    public void execute(){
+        while(!finish)
+        {
+            if(DEBUG)
+                System.out.println(ANSI_RED+"ESTADO_CONTROLLER : " + state);
+             
+            switch(state)
+            {
+                case SUSCRIBE:
+                    //state = LOGIN_AGENTS;
+                    suscribe();
+                    break;
+                case AWAKE_AGENTS:
+                    awakeAgents();
+                    break;
+                case REQUEST_CHECKIN:
+                    requestCheckin();
+                    break;
+
+                case WAIT_CHECKIN:
+                    waitCheckin();
+                    break;
+
+                case WAIT_IDLE:
+                    waitIdle();
+                    break;
+                
+                case REQUEST_INFO:
+                    requestInfo();
+                    break;
+                    
+                case UPDATE_INFO:
+                    updateInfo();
+                    break;
+                    
+                case SELECT_POSITION:
+                    selectPosition();
+                    break;    
+                case FINISH:
+                    finish();
+                break;
+/*
+                case SEND_COMMAND:
+                    sendCommand();
+                break;
+                    */
+            }
+            
+           
+        }
+       System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
     }
     
 }
