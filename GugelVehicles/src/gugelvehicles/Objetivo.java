@@ -55,9 +55,7 @@ public class Objetivo {
     private static ArrayList<MapPoint> abiertos = new ArrayList<>();
     private static ArrayList<MapPoint> cerrados = new ArrayList<>();
     private static ArrayList<MapPoint> traza = new ArrayList<>();
-    
-    
-    private static int m = 500;
+   
      
        
     public static MapPoint abiertoMasCercano(){
@@ -313,14 +311,34 @@ public class Objetivo {
     
     public static void printMap(ArrayList<Integer> map, ArrayList<Integer> abiert){
         System.out.println(" ");
+        for(int j = 0; j < 510; j++){
+            for(int i = 0; i < 510; i++){
+                
+                System.out.print(map.get(j*510+i));
+                
+            }
+            System.out.println("");
+        }
         for(int i = 0; i < 510; i++){
             for(int j = 0; j < 510; j++){
                 
-                System.out.print(map.get(i*510+j));
-                    
+                //System.out.print(map.get(j*510+i));
+                if(map.get(j*510+i) == 2){
+                    //  System.out.println("MURO EXTERIOR EN i(x): " + i + " j(y): " + j);
+                }
                 
+                
+                if(map.get(j*510+i) == 4){
+                    System.out.println("VEHICULO EN i(x): " + i + " j(y): " + j);
+                    System.out.println("A SU DERECHA HAY UN: " +  map.get(j*510+i+1));
+                    System.out.println("A SU IZQUIERDA HAY UN: " +  map.get(j*510+i-1));
+                    System.out.println("ARRIBA HAY UN: " +  map.get((j+1)*510+i));
+                    System.out.println("ABAJO HAY UN: " +  map.get((j-1)*510+i));        
+                }
             }
-            System.out.println(" ");
+           // System.out.println("");
+        
+        
         }
         
                 
@@ -347,7 +365,7 @@ public class Objetivo {
         
         x_actual = actual_x;
         y_actual = actual_y;
-        printMap(mapa,abie);
+      //  printMap(mapa,abie);
         /*
         for(int i = 0; i <vehiclePosition.size();i++){
          map_visto.set(vehiclePosition.get(i).y*504+vehiclePosition.get(i).x, 1);           
@@ -373,7 +391,8 @@ public class Objetivo {
                 puntoObjetivo = abiertoMasCercanoFin();
             }
             path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
-            System.out.println("PObjetivo: " + puntoObjetivo + " Path: " + path + " que hay en ese punto: " + map_visto.get(actual_x*m_real+actual_y));
+            System.out.println("PObjetivo: " + puntoObjetivo + " Path: " + path + 
+                    " que hay en ese punto: " + map_visto.get(actual_x*m_real+actual_y));
             if(path == null){
                 abiertos.remove(abiertos.indexOf(puntoObjetivo));
             }else{

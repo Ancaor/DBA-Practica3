@@ -15,7 +15,7 @@ import es.upv.dsic.gti_ia.core.AgentsConnection;
 public class GugelVehicles {
 
     private static final AgentID SERVER_AGENT = new AgentID("Keid");
-    private static final AgentID CONTROLLER_AGENT = new AgentID("CONTROLLER111111111111111112111111111111111112323111111111111111111111");
+    private static final AgentID CONTROLLER_AGENT = new AgentID("CONTROLLER11111111111111111111111111111111111111121111111111111111112323111111111111111111111");
     
     public static final String ANSI_RESET = "\033[30m";
     public static final String ANSI_RED = "\033[31m";

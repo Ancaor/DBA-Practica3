@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111121122";
-    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car112221111111111111111111111111111111111111111111111111111111111111111111111121122";
+    String truckAgent_name = "truc1k111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron11111111111111111111111111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -247,7 +247,9 @@ public class AgentController extends Agent{
                 System.out.println(mapa.get(abi.get(i)));
             }
             
-            
+            System.out.println(ANSI_RED + "MAPA DEL CONTROLADOR");
+            Objetivo.printMap(mapa, abi);
+            //Objetivo.printMap()
             nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
 
             System.out.println(ANSI_RED + "No esta en el objetivo");
@@ -339,8 +341,8 @@ public class AgentController extends Agent{
         }
         
         int index = 0;
-            for(int i = posicionVehiculoY-tamanio; i <= posicionVehiculoY+tamanio; i++)
-                for(int j = posicionVehiculoX-tamanio; j <= posicionVehiculoX+tamanio; j++){
+            for(int i = posicionVehiculoX-tamanio; i <= posicionVehiculoX+tamanio; i++)
+                for(int j = posicionVehiculoY-tamanio; j <= posicionVehiculoY+tamanio; j++){
                     if(mapa.get(i*m+j) ==0 && radar.get(index) ==1){
                        // if(DEBUG)
                            // System.out.println(ANSI_YELLOW+"SOBRESCRIBIENDO UN CERO CON UN UNO");
@@ -409,7 +411,7 @@ public class AgentController extends Agent{
             radar.add(radarJson.get(i).asInt());
         }
         
-        
+        System.out.println("RADAR RECIBIDO: " + radar.toString());
         
         this.state = UPDATE_INFO;
     }

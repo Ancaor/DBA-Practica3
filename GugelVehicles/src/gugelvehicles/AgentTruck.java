@@ -472,12 +472,15 @@ public class AgentTruck extends Agent{
             tamanio = 5;
         }
         
+        System.out.println("RADAR MAPA");
         int index = 0;
             for(int i = this.y-tamanio; i <= this.y+tamanio; i++)
                 for(int j = this.x-tamanio; j <= this.x+tamanio; j++){
                     posiciones.add(i*510+j);
+                   // System.out.print()
                 }
-        
+        //System.out.println("RADAR MAPA: " + posiciones.toString());
+           
         return posiciones;
     }
 

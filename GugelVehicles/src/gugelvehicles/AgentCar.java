@@ -274,7 +274,7 @@ public class AgentCar extends Agent {
         information_package.add("pos", this.position );
         information_package.add("objetive_pos", pos_objetivo);
         System.out.println(information_package.toString());
-        
+        System.out.println("-----POSICION VEHICULO: x:" + position%510 + " y:" + position/510);
         this.state = WAIT_TURN;
         
         
