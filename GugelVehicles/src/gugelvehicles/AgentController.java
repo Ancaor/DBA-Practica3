@@ -234,12 +234,7 @@ public class AgentController extends Agent{
 
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
                // System.out.println(entry.getValue().get(0));
-                if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
-                    System.out.println("MI ID: " + arrayVehiculos.get(turnoActual));
-                    System.out.println("IDs abiertos: ");
-                    for(int i = 0; i < entry.getValue().size(); i++)
-                        System.out.print(entry.getValue().get(i));
-                    
+                if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){                    
                     abi.add(entry.getKey());
                 }
             }
