@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111111111111111111111111111111111111121122";
-    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111121122";
+    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -149,8 +149,8 @@ public class AgentController extends Agent{
     
    
     public MapPoint iniciarMapPoint(int a){
-        int x = a/tamanio_mapa;
-        int y = a%tamanio_mapa;
+        int x = a%tamanio_mapa;
+        int y = a/tamanio_mapa;
         MapPoint resultado = new MapPoint(x,y);
         return resultado;
     }
@@ -175,7 +175,25 @@ public class AgentController extends Agent{
             return "moveS";    
         else      
             return "moveSE";     
-        
+
+       /* 
+        if((m.y > this.posicionVehiculoY) && (m.x > this.posicionVehiculoX))
+            return "moveNW";
+        else if(m.y > this.posicionVehiculoY && m.x == this.posicionVehiculoX)
+            return "moveN"; 
+        else if(m.y > this.posicionVehiculoY && m.x < this.posicionVehiculoX)
+            return "moveNE";
+        else if(m.y == this.posicionVehiculoY && m.x > this.posicionVehiculoX)
+            return "moveW";
+        else if(m.y == this.posicionVehiculoY && m.x < this.posicionVehiculoX)
+            return "moveE";
+        else if(m.y < this.posicionVehiculoY && m.x > this.posicionVehiculoX)        
+            return "moveSW";   
+        else if(m.y < this.posicionVehiculoY && m.x == this.posicionVehiculoX)        
+            return "moveS";    
+        else      
+            return "moveSE";
+        */
     }
    
     public double distance(MapPoint p1, MapPoint p2){
@@ -185,7 +203,6 @@ public class AgentController extends Agent{
     }
     
     private boolean IsOnObjetive(){
-    
         if(radar.size() == 9){
             if(radar.get(4) == 3)
                 return true;
@@ -209,7 +226,7 @@ public class AgentController extends Agent{
     private void selectPosition(){
         System.out.println(ANSI_RED + "seleccionando posición");
         if(!this.IsOnObjetive()){
-            //System.out.println(ANSI_RED + "No esta en el objetivo");
+            System.out.println(ANSI_RED + "No esta en el objetivo");
             Objetivo proxObj = new Objetivo();
 
             ArrayList<Integer> abi = new ArrayList<>();
@@ -273,7 +290,7 @@ public class AgentController extends Agent{
             
             
         }else{
-            
+            System.out.println(ANSI_RED + "ESTA EN OBJETIVO");
             JsonObject response = Json.object();
 
             response.add("command", "FINISH");
@@ -312,6 +329,8 @@ public class AgentController extends Agent{
                     cerradosFinal.put(cerrados.get(i), coincidencias);
             }
         }
+        
+        System.out.println(ANSI_RED + "PASA EL PRIMER FOR DE ABIERTOS");
         //System.out.println(ANSI_RED+"abiertos");
         for(int i = 0; i < abiertos.size(); i++){
             //System.out.println(abiertos.get(i));
@@ -331,7 +350,7 @@ public class AgentController extends Agent{
             }
         }
         
-        
+         System.out.println(ANSI_RED + "PASA EL SEGUNDO FOR DE CERRADOS");
         cerrados.clear();
         abiertos.clear();
         int tamanio = 0;
@@ -345,30 +364,33 @@ public class AgentController extends Agent{
         else{
             tamanio = 5;
         }
-        
+        System.out.println(ANSI_RED + "VA A ENTRAR EN FOR DE ESCRIBIR RADAR");
+        System.out.println(ANSI_RED + "POSICION ANTES DE ENTRAR A ESCRIBIR: x:" +posicionVehiculoX + " y: " +posicionVehiculoY);
         int index = 0;
-            for(int i = posicionVehiculoX-tamanio; i <= posicionVehiculoX+tamanio; i++)
-                for(int j = posicionVehiculoY-tamanio; j <= posicionVehiculoY+tamanio; j++){
-                    if(mapa.get(i*m+j) ==0 && radar.get(index) ==1){
+            for(int i = posicionVehiculoY-tamanio; i <= posicionVehiculoY+tamanio; i++)
+                for(int j = posicionVehiculoX-tamanio; j <= posicionVehiculoX+tamanio; j++){
+                    if(mapa.get(j*m+i) ==0 && radar.get(index) ==1){
                        // if(DEBUG)
                            // System.out.println(ANSI_YELLOW+"SOBRESCRIBIENDO UN CERO CON UN UNO");
                     }
                     if(DEBUG)
                         //System.out.println(ANSI_YELLOW+radar.get(index));
                     
-                    mapa.set(j*m+i, radar.get(index));
+                    mapa.set(i*m+j, radar.get(index));
                     if(mapa.get(i*m+j) == 0){
                        // if(DEBUG)
                             //System.out.println(ANSI_YELLOW+"PUESTOS 0");
                     }
                     index+=1;
                 }
+        System.out.println(ANSI_RED + "ACABA UPDATE INFO Y VA A PASAR A OTRO ESTADO");
         state = SELECT_POSITION;
     }
     
     private void requestInfo(){
         abiertos.clear();
         cerrados.clear();
+        radar.clear();
       //  this.sendMessage(this.arrayVehiculos.get(turnoActual), "", ACLMessage.QUERY_REF, conversationID, "", "");
         ArrayList<String> msg = this.receiveMessage();
         System.out.println(ANSI_RED + "recibe la info");
@@ -402,6 +424,7 @@ public class AgentController extends Agent{
         posicionVehiculoX = aux.x;
         posicionVehiculoY = aux.y;
         
+        System.out.println(ANSI_RED + "\npos x a guardar: " + posicionVehiculoX + " pos y a guardar: " + posicionVehiculoY);
         MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
         System.out.println(ANSI_RED+turnoActual);
         vehiclesPositions.set(turnoActual, pos);  // MAL

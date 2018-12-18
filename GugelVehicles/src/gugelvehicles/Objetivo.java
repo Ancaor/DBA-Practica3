@@ -303,8 +303,8 @@ public class Objetivo {
     }
     
     public MapPoint iniciarMapPoint(int a){
-        int x = a/510;
-        int y = a%510;
+        int x = a%510;
+        int y = a/510;
         MapPoint resultado = new MapPoint(x,y);
         return resultado;
     }
@@ -332,8 +332,8 @@ public class Objetivo {
                     System.out.println("VEHICULO EN i(x): " + i + " j(y): " + j);
                     System.out.println("A SU DERECHA HAY UN: " +  map.get(j*510+i+1));
                     System.out.println("A SU IZQUIERDA HAY UN: " +  map.get(j*510+i-1));
-                    System.out.println("ARRIBA HAY UN: " +  map.get((j+1)*510+i));
-                    System.out.println("ABAJO HAY UN: " +  map.get((j-1)*510+i));        
+                    System.out.println("ARRIBA HAY UN: " +  map.get((j-1)*510+i));
+                    System.out.println("ABAJO HAY UN: " +  map.get((j+1)*510+i));        
                 }
             }
            // System.out.println("");
@@ -363,26 +363,27 @@ public class Objetivo {
             System.out.print(abiertos.get(i));
         }
         
-        x_actual = actual_x;
-        y_actual = actual_y;
-      //  printMap(mapa,abie);
+
+        System.out.println("MAPA DE OBJETIVO");
+        System.out.println("OBJETIVO|| x_actual: " + actual_x + " y_actual: " +actual_y);
+        //printMap(mapa,abie);
         /*
         for(int i = 0; i <vehiclePosition.size();i++){
          map_visto.set(vehiclePosition.get(i).y*504+vehiclePosition.get(i).x, 1);           
         }
 */
         
-        ThetaStar z = new ThetaStar(m_real, map_visto);
+        ThetaStar z = new ThetaStar(m_real, mapa);
         
         //MapPoint act = new MapPoint(x_actual,y_actual);
-        
+        //printMap(z.map_real, null);
         MapPoint puntoObjetivo = null;
         ArrayList<MapPoint> path = null;
         
         
         while(path == null){
-            z = new ThetaStar(m_real, map_visto);
-        
+            z = new ThetaStar(m_real, mapa);
+            
             if(!objetivoDefinido){
                 puntoObjetivo = abiertoMasCercano();
             }else{
@@ -390,9 +391,9 @@ public class Objetivo {
                 pFin = iniciarMapPoint(objetivo);
                 puntoObjetivo = abiertoMasCercanoFin();
             }
-            path = z.calculateThetaStar(new MapPoint(x_actual, y_actual), puntoObjetivo);
+            path = z.calculateThetaStar(new MapPoint(actual_x, actual_y), puntoObjetivo);
             System.out.println("PObjetivo: " + puntoObjetivo + " Path: " + path + 
-                    " que hay en ese punto: " + map_visto.get(actual_x*m_real+actual_y));
+                    " que hay en ese punto: " + mapa.get(puntoObjetivo.y*m_real+puntoObjetivo.x));
             if(path == null){
                 abiertos.remove(abiertos.indexOf(puntoObjetivo));
             }else{

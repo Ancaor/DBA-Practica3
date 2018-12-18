@@ -17,12 +17,12 @@ import java.util.PriorityQueue;
  * @author Ruben
  */
 public class ThetaStar {
-    private ArrayList<Integer> map_real = new ArrayList<>();
+    public ArrayList<Integer> map_real = new ArrayList<>();
     private final int width;
     private PriorityQueue<Node> openList;
     private ArrayList<Node> closedList;
     
-        public ThetaStar(int width, ArrayList<Integer> map) {
+    public ThetaStar(int width, ArrayList<Integer> map) {
         this.width = width;
         map_real = map;      
     }
@@ -82,12 +82,14 @@ public class ThetaStar {
                         adjPoint = new MapPoint(currentPoint.x-1, currentPoint.y);
                     }
 
-                    else{     
+                    else {     
                         adjPoint = new MapPoint(currentPoint.x-1, currentPoint.y-1);
                     }
                     
                     
-                    if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 2)){
+                    if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1) && 
+                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && 
+                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 2)){
                        Node adjNode = new Node(adjPoint,currentNode);
                        adjNode.calculateValues(goal);
                  //      System.out.println("ENTRA EN IF: " + this.map_real.get(adjPoint.y * this.width + adjPoint.x));
