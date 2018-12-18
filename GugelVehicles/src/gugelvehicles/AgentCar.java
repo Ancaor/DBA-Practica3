@@ -358,7 +358,7 @@ public class AgentCar extends Agent {
         message = Json.object();
         
         message.add("state", "FIN_TURNO");
-        
+        this.reply_with_server =  response.get(2);
         
         this.sendMessage(controllerAgent, message.toString(), ACLMessage.INFORM, conversationID, "", "");
         

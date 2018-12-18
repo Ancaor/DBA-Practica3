@@ -211,6 +211,7 @@ private ArrayList<Integer> radar = new ArrayList<>();
         String performativa = respuesta.get(0);
         String conv_id = respuesta.get(1);
         String content = respuesta.get(3);
+        this.reply_with_server =  respuesta.get(2);
         
         System.out.println(ANSI_GREEN+performativa);
         System.out.println(ANSI_GREEN+content);
@@ -345,6 +346,7 @@ private ArrayList<Integer> radar = new ArrayList<>();
         message = Json.object();
         
         message.add("state", "FIN_TURNO");
+        this.reply_with_server =  response.get(2);
         
         
         this.sendMessage(controllerAgent, message.toString(), ACLMessage.INFORM, conversationID, "", "");
