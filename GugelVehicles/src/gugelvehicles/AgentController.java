@@ -324,6 +324,9 @@ public class AgentController extends Agent{
             ArrayList<AgentID> coincidencias = new ArrayList<>();
             if(!cerradosFinal.containsKey(cerrados.get(i))){                
                 cerradosFinal.put(cerrados.get(i), coincidencias);
+                if(abiertosFinal.containsKey(cerrados.get(i))){ 
+                    abiertosFinal.remove(cerrados.get(i)); 
+                } 
             }
             else{
                 coincidencias = cerradosFinal.get(cerrados.get(i));
