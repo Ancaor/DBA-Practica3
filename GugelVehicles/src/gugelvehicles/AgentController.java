@@ -520,6 +520,8 @@ public class AgentController extends Agent{
             state=REQUEST_CHECKIN;
         }else{
             System.out.println(ANSI_RED+"Fallo al suscribirse");
+            this.guardarTraza(content);
+            
             System.out.println(response.get(3));
             state=FINISH_ERROR;
         }
@@ -725,4 +727,28 @@ public class AgentController extends Agent{
                 System.out.println(ANSI_RED+"Error procesando traza"); 
             } 
     } 
+
+    private void guardarTraza(String content) {
+BufferedImage im = null; 
+        try{ 
+                System.out.println(ANSI_RED+"Recibiendo traza ..."); 
+ 
+                JsonObject injson = Json.parse(content).asObject(); 
+ 
+                JsonArray array = injson.get("trace").asArray(); 
+                byte data[] = new byte[array.size()]; 
+                for(int i = 0; i<data.length; i++) 
+                    data[i] = (byte) array.get(i).asInt(); 
+ 
+                FileOutputStream fos  = new FileOutputStream("mitraza.png"); 
+                fos.write(data); 
+                fos.close(); 
+ 
+                 im = ImageIO.read(new File("mitraza_error.png")); 
+                 
+                System.out.println(ANSI_RED+"TAMANIO MAPA: " + im.getWidth()); 
+                System.out.println(ANSI_RED+"Traza guardada"); 
+            }catch(IOException ex){ 
+                System.out.println(ANSI_RED+"Error procesando traza"); 
+            }     }
 }

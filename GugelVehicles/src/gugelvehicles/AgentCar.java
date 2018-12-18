@@ -333,11 +333,11 @@ public class AgentCar extends Agent {
         
         JsonObject message = Json.object();
         
-      //  if(this.battery < UMBRAL_BATERIA){
+        if(this.battery < UMBRAL_BATERIA){
             message.add("command", "refuel");
             System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
-       /* }else{
+        }else{
             
             message.add("command", this.next_pos);
             System.out.println(ANSI_BLUE + "MENSAJE ANTES DEL SEND: " + message.toString());
@@ -345,7 +345,7 @@ public class AgentCar extends Agent {
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST , conversationID, this.reply_with_server, "");
             
         }
-        */
+        
         ArrayList<String> response = this.receiveMessage();
         
         String performativa = response.get(0);
