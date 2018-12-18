@@ -80,7 +80,9 @@ public class AgentController extends Agent{
     
     MapPoint nextObj;
     private ArrayList<MapPoint> vehiclesPositions = new ArrayList<>(4); 
-    private ArrayList<MapPoint> nextPositions = new ArrayList<>(4);    
+    private ArrayList<MapPoint> nextPositions = new ArrayList<>(4);  
+    
+    ArrayList<ArrayList<AgentID>> coincidencias = new ArrayList<>();
 
     
     /////////////////////////////////////////////
@@ -97,6 +99,22 @@ public class AgentController extends Agent{
         this.arrayVehiculos.add(this.car2Agent);
         this.arrayVehiculos.add(this.truckAgent);
         this.arrayVehiculos.add(this.dronAgent);
+        
+        ArrayList<AgentID> coincidencias_vehiculo1 = new ArrayList<>();
+        coincidencias_vehiculo1.add(this.car1Agent);
+        this.coincidencias.add(coincidencias_vehiculo1);
+        
+        ArrayList<AgentID> coincidencias_vehiculo2 = new ArrayList<>();
+        coincidencias_vehiculo2.add(this.car2Agent);
+        this.coincidencias.add(coincidencias_vehiculo2);
+        
+        ArrayList<AgentID> coincidencias_vehiculo3 = new ArrayList<>();
+        coincidencias_vehiculo3.add(this.truckAgent);
+        this.coincidencias.add(coincidencias_vehiculo3);
+        
+        ArrayList<AgentID> coincidencias_vehiculo4 = new ArrayList<>();
+        coincidencias_vehiculo4.add(this.dronAgent);
+        this.coincidencias.add(coincidencias_vehiculo4);
         
         this.vehiclesPositions.add(new MapPoint(0,0));
         this.vehiclesPositions.add(new MapPoint(0,0));
@@ -231,12 +249,22 @@ public class AgentController extends Agent{
 
             ArrayList<Integer> abi = new ArrayList<>();
             ArrayList<Integer> cer = new ArrayList<>();
+            
+            ArrayList<AgentID> coincidencias_actual = this.coincidencias.get(this.turnoActual);
+            
+            System.out.println("Tamaño map abiertos: " + abiertosFinal.size());
+            System.out.println(ANSI_RED + "COINCIDENCIAS: ");
+            System.out.print(ANSI_RED + coincidencias_actual.get(0));
+           // for(int i = 0; i < coincidencias_actual.size(); i++)
+              //  System.out.print(ANSI_RED + coincidencias_actual.get(i));
 
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
-               // System.out.println(entry.getValue().get(0));
-                if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){                    
-                    abi.add(entry.getKey());
-                }
+               System.out.print(ANSI_RED + "Entrada de abiertos: " + entry.getValue());
+               for(int i = 0; i < coincidencias_actual.size(); i++){
+                    if(entry.getValue().contains(coincidencias_actual.get(i))){                    
+                        abi.add(entry.getKey());
+                    }
+               }
             }
             
            
@@ -325,7 +353,7 @@ public class AgentController extends Agent{
             if(!cerradosFinal.containsKey(cerrados.get(i))){                
                 cerradosFinal.put(cerrados.get(i), coincidencias);
                 if(abiertosFinal.containsKey(cerrados.get(i))){ 
-                    abiertosFinal.remove(cerrados.get(i)); 
+                    abiertosFinal.remove(cerrados.get(i));
                 } 
             }
             else{
@@ -341,19 +369,27 @@ public class AgentController extends Agent{
         System.out.println(ANSI_RED + "PASA EL PRIMER FOR DE CERRADOS");
         //System.out.println(ANSI_RED+"abiertos");
         for(int i = 0; i < abiertos.size(); i++){
-            //System.out.println(abiertos.get(i));
             if(!cerradosFinal.containsKey(abiertos.get(i))){
-                ArrayList<AgentID> coincidencias = new ArrayList<>();
+                ArrayList<AgentID> coincidencia = new ArrayList<>();
                 if(!abiertosFinal.containsKey(abiertos.get(i))){                
-                    abiertosFinal.put(abiertos.get(i), coincidencias);
+                    abiertosFinal.put(abiertos.get(i), coincidencia);
                 }
                 else{
-                    coincidencias = abiertosFinal.get(abiertos.get(i));
+                    ArrayList<AgentID> auxs = abiertosFinal.get(abiertos.get(i));
+                    //coincidencias = abiertosFinal.get(abiertos.get(i));
+                    for(int j = 0; j < auxs.size(); j++){
+                        AgentID aux = auxs.get(j);
+                        if(!this.coincidencias.get(turnoActual).contains(aux)){
+                            System.out.println("Se juntan caminos de " + aux + " y " + this.arrayVehiculos.get(this.turnoActual) );
+                            this.coincidencias.get(turnoActual).add(aux);
+                        }
+                    }
+                    
                 }
 
-                if(!coincidencias.contains(arrayVehiculos.get(turnoActual))){
-                        coincidencias.add(arrayVehiculos.get(turnoActual));
-                        abiertosFinal.put(abiertos.get(i), coincidencias);
+                if(!coincidencia.contains(arrayVehiculos.get(turnoActual))){
+                        coincidencia.add(arrayVehiculos.get(turnoActual));
+                        abiertosFinal.put(abiertos.get(i), coincidencia);
                 }
             }
         }
