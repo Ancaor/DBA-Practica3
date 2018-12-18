@@ -204,7 +204,7 @@ public class AgentCar extends Agent {
     private void requestWorldInfo() {
         
         System.out.println(ANSI_BLUE + "Solicita información del mundo");
-        
+        radar.clear();
         
         System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
@@ -216,10 +216,14 @@ public class AgentCar extends Agent {
         String content = respuesta.get(3);
         this.reply_with_server =  respuesta.get(2);
         
-        System.out.println(performativa);
-        System.out.println(ANSI_BLUE+content);
-        System.out.println(conv_id);
-        System.out.println(reply_with_server);
+        System.out.println(ANSI_BLUE +"**Contenido del mensaje recibido del servidor**");
+        
+        System.out.println(ANSI_BLUE + "Performativa: " + performativa);
+        System.out.println(ANSI_BLUE + "Contenido: " + content);
+        System.out.println(ANSI_BLUE + "ConversationID: " +conv_id);
+        System.out.println(ANSI_BLUE + "ReplyWith: " +reply_with_server);
+        
+        System.out.println(ANSI_BLUE +"************************************************");
         
         JsonObject object = Json.parse(content).asObject();
         
@@ -237,6 +241,8 @@ public class AgentCar extends Agent {
             this.radar.add(aux.get(i).asInt());
         }
         
+        
+        
         this.posiciones_Radar = convertRadarToPositions();
         
       //  for(int i=0; i < radar.size(); i++){
@@ -250,16 +256,20 @@ public class AgentCar extends Agent {
         this.goal = result.get("goal").asBoolean();
         
         
-        ArrayList<Integer> abiertos = calcularAbiertos();
-        System.out.println("abiertos");
-        for(int i=0; i < abiertos.size(); i++){
-          //  System.out.println(abiertos.get(i));
-        }
         ArrayList<Integer> cerrados = calcularCerrados();
         System.out.println("cerrados");
         for(int i=0; i < cerrados.size(); i++){
-           // System.out.println(cerrados.get(i));
+            System.out.println(cerrados.get(i));
         }
+        
+        ArrayList<Integer> abiertos = calcularAbiertos(cerrados);
+        System.out.println("abiertos");
+        for(int i=0; i < abiertos.size(); i++){
+            System.out.println(abiertos.get(i));
+        }
+       
+        
+        
         
         int pos_objetivo = obtenerPosObjetivo();
        // System.out.println("pos_objetivo");
@@ -340,16 +350,23 @@ public class AgentCar extends Agent {
         }else{
             
             message.add("command", this.next_pos);
-            System.out.println(ANSI_BLUE + "MENSAJE ANTES DEL SEND: " + message.toString());
+            
+            System.out.println(ANSI_PURPLE + "conversationID: " + conversationID);
+            System.out.println(ANSI_PURPLE + "Performativa: " + ACLMessage.REQUEST);
+            System.out.println(ANSI_PURPLE + "Contenido: " + message.toString());
+            System.out.println(ANSI_PURPLE + "Reply-with: " + this.reply_with_server);
+            
             System.out.println(ANSI_BLUE + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST , conversationID, this.reply_with_server, "");
             
         }
         
         ArrayList<String> response = this.receiveMessage();
+        System.out.println(ANSI_BLUE + "Recibido");
         
         String performativa = response.get(0);
         String content = response.get(3);
+        
         
         System.out.println(ANSI_BLUE + "CONVERSATIONID SEND_COMMAND_TO_SERVER: " + conversationID);
         System.out.println(ANSI_BLUE + "PERFORMATIVE SEND_COMMAND_TO_SERVER: " + performativa);
@@ -366,19 +383,23 @@ public class AgentCar extends Agent {
         
     }
     
-    public ArrayList<Integer> calcularAbiertos(){
+    public ArrayList<Integer> calcularAbiertos(ArrayList<Integer> cerrados){
         ArrayList<Integer> abiertos = new ArrayList<>();
         
         for(int i=0; i<this.range; i++)
-            abiertos.add(this.posiciones_Radar.get(i));
+            if(!cerrados.contains(this.posiciones_Radar.get(i)))
+                abiertos.add(this.posiciones_Radar.get(i));
         
         for(int i=1; i < this.range-1; i++){
-            abiertos.add(this.posiciones_Radar.get(this.range*i));
-            abiertos.add(this.posiciones_Radar.get((this.range*(i+1))-1));
+            if(!cerrados.contains(this.posiciones_Radar.get(this.range*i)))
+                abiertos.add(this.posiciones_Radar.get(this.range*i));
+            if(!cerrados.contains(this.posiciones_Radar.get((this.range*(i+1))-1)))
+                abiertos.add(this.posiciones_Radar.get((this.range*(i+1))-1));
         }
         
         for(int i=0; i < this.range; i++){
-            abiertos.add(this.posiciones_Radar.get((this.range*(this.range-1))+i));
+            if(!cerrados.contains(this.posiciones_Radar.get((this.range*(this.range-1))+i)))
+                abiertos.add(this.posiciones_Radar.get((this.range*(this.range-1))+i));
         }
         
         
@@ -413,11 +434,16 @@ public class AgentCar extends Agent {
         ArrayList<Integer> cerrados = new ArrayList<>();
         
         
-        for(int i=1; i < this.range-1; i++){
-            for(int j=1; j < this.range-1; j++){
-                cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+        for(int i=0; i < this.range; i++){                
+            for(int j=0; j < this.range; j++){
+                if(i == this.range-1 || j == this.range-1 || i == 0 || j == 0){
+                    if(this.radar.get((this.range*i)+j) == 1 || this.radar.get((this.range*i)+j) == 2)
+                        cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+                }
+                else{
+                    cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+                }
             }
-            
         }
         
          

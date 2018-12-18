@@ -77,7 +77,7 @@ private ArrayList<Integer> radar = new ArrayList<>();
         this.controllerAgent = controllerID;
 
 
-        System.out.println(ANSI_GREEN + "Camion inicializado");
+        System.out.println(ANSI_GREEN + "Dron inicializado");
         state = WAIT_CONTROLLER;
     }
     
@@ -203,6 +203,8 @@ private ArrayList<Integer> radar = new ArrayList<>();
     private void requestWorldInfo() {
         
         System.out.println(ANSI_GREEN + "Solicita información del mundo");
+        radar.clear();
+        
             System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
         this.sendMessage(this.serverAgent, "", ACLMessage.QUERY_REF, conversationID, this.reply_with_server,"");
         
@@ -213,21 +215,24 @@ private ArrayList<Integer> radar = new ArrayList<>();
         String content = respuesta.get(3);
         this.reply_with_server =  respuesta.get(2);
         
-        System.out.println(ANSI_GREEN+performativa);
-        System.out.println(ANSI_GREEN+content);
-        System.out.println(ANSI_GREEN+conv_id);
-        System.out.println(ANSI_GREEN+reply_with_server);
+        System.out.println(ANSI_GREEN +"**Contenido del mensaje recibido del servidor**");
+        
+        System.out.println(ANSI_GREEN + "Performativa: " + performativa);
+        System.out.println(ANSI_GREEN + "Contenido: " + content);
+        System.out.println(ANSI_GREEN + "ConversationID: " +conv_id);
+        System.out.println(ANSI_GREEN + "ReplyWith: " +reply_with_server);
+        
+        System.out.println(ANSI_GREEN +"************************************************");
         
         JsonObject object = Json.parse(content).asObject();
         
         JsonObject result = object.get("result").asObject();
         
         this.battery = result.get("battery").asInt();
-        System.out.println("bateria " + this.battery);
         this.x = result.get("x").asInt()+5;
         this.y = result.get("y").asInt()+5;
         this.position = this.x + (this.y * 510);
-        System.out.println("x " + this.x + " y "+ this.y);
+        System.out.println(ANSI_GREEN +"x " + this.x + " y "+ this.y);
         JsonArray aux = result.get("sensor").asArray();
         
         for(int i=0; i < aux.size();i++){
@@ -246,16 +251,23 @@ private ArrayList<Integer> radar = new ArrayList<>();
         this.goal = result.get("goal").asBoolean();
         
         
-        ArrayList<Integer> abiertos = calcularAbiertos();
-       // System.out.println("abiertos");
-       // for(int i=0; i < abiertos.size(); i++){
-       //     System.out.println(abiertos.get(i));
-       // }
+        
         ArrayList<Integer> cerrados = calcularCerrados();
-       // System.out.println("cerrados");
-    //    for(int i=0; i < cerrados.size(); i++){
-  //          System.out.println(cerrados.get(i));
-     //   }
+        System.out.println("cerrados");
+        for(int i=0; i < cerrados.size(); i++){
+            System.out.println(cerrados.get(i));
+        }
+        
+        
+        ArrayList<Integer> abiertos = calcularAbiertos(cerrados);
+        System.out.println("abiertos");
+        for(int i=0; i < abiertos.size(); i++){
+            System.out.println(abiertos.get(i));
+        }
+       
+       
+        
+    
         
         int pos_objetivo = obtenerPosObjetivo();
        // System.out.println("pos_objetivo");
@@ -272,7 +284,7 @@ private ArrayList<Integer> radar = new ArrayList<>();
         information_package.add("cerrados", this.convertToJson(cerrados));
         information_package.add("pos", this.position );
         information_package.add("objetive_pos", pos_objetivo);
-        System.out.println(information_package.toString());
+        System.out.println(ANSI_GREEN + information_package.toString());
         
         this.state = WAIT_CONTROLLER_COMMAND;
         
@@ -332,17 +344,25 @@ private ArrayList<Integer> radar = new ArrayList<>();
         }else{
             
             message.add("command", this.netx_pos);
+            
+            System.out.println(ANSI_PURPLE + "conversationID: " + conversationID);
+            System.out.println(ANSI_PURPLE + "Performativa: " + ACLMessage.REQUEST);
+            System.out.println(ANSI_PURPLE + "Contenido: " + message.toString());
+            System.out.println(ANSI_PURPLE + "Reply-with: " + this.reply_with_server);
             System.out.println(ANSI_GREEN + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
         }
         
         ArrayList<String> response = this.receiveMessage();
+        System.out.println(ANSI_GREEN + "Recibido");
         
         String performativa = response.get(0);
         String content = response.get(3);
         
-        System.out.println(performativa);
-        System.out.println(content);
+        System.out.println(ANSI_GREEN + "CONVERSATIONID SEND_COMMAND_TO_SERVER: " + conversationID);
+        System.out.println(ANSI_GREEN + "PERFORMATIVE SEND_COMMAND_TO_SERVER: " + performativa);
+        System.out.println(ANSI_GREEN + "CONTENT SEND_COMMAND_TO_SERVER: " + content);
+        
         message = Json.object();
         
         message.add("state", "FIN_TURNO");
@@ -355,19 +375,23 @@ private ArrayList<Integer> radar = new ArrayList<>();
         
     }
     
-    public ArrayList<Integer> calcularAbiertos(){
+    public ArrayList<Integer> calcularAbiertos(ArrayList<Integer> cerrados){
         ArrayList<Integer> abiertos = new ArrayList<>();
         
         for(int i=0; i<this.range; i++)
-            abiertos.add(this.posiciones_Radar.get(i));
+            if(!cerrados.contains(this.posiciones_Radar.get(i)))
+                abiertos.add(this.posiciones_Radar.get(i));
         
         for(int i=1; i < this.range-1; i++){
-            abiertos.add(this.posiciones_Radar.get(this.range*i));
-            abiertos.add(this.posiciones_Radar.get((this.range*(i+1))-1));
+            if(!cerrados.contains(this.posiciones_Radar.get(this.range*i)))
+                abiertos.add(this.posiciones_Radar.get(this.range*i));
+            if(!cerrados.contains(this.posiciones_Radar.get((this.range*(i+1))-1)))
+                abiertos.add(this.posiciones_Radar.get((this.range*(i+1))-1));
         }
         
         for(int i=0; i < this.range; i++){
-            abiertos.add(this.posiciones_Radar.get((this.range*(this.range-1))+i));
+            if(!cerrados.contains(this.posiciones_Radar.get((this.range*(this.range-1))+i)))
+                abiertos.add(this.posiciones_Radar.get((this.range*(this.range-1))+i));
         }
         
         
@@ -378,11 +402,16 @@ private ArrayList<Integer> radar = new ArrayList<>();
         ArrayList<Integer> cerrados = new ArrayList<>();
         
         
-        for(int i=1; i < this.range-1; i++){
-            for(int j=1; j < this.range-1; j++){
-                cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+        for(int i=0; i < this.range; i++){                
+            for(int j=0; j < this.range; j++){
+                if(i == this.range-1 || j == this.range-1 || i == 0 || j == 0){
+                    if(this.radar.get((this.range*i)+j) == 1 || this.radar.get((this.range*i)+j) == 2)
+                        cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+                }
+                else{
+                    cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
+                }
             }
-            
         }
         
          

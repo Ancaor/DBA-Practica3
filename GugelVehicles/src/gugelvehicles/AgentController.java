@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car1122211111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111121122";
-    String truckAgent_name = "truc1k1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car11111111111112111111111111111111111111111";
+    String car2Agent_name = "car11222111111112111111111111111111111111111";
+    String truckAgent_name = "truc1k1111111112111111111111111111111111111";
+    String dronAgent_name = "dron1111111111112111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -233,8 +233,13 @@ public class AgentController extends Agent{
             ArrayList<Integer> cer = new ArrayList<>();
 
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
-                System.out.println(entry.getValue().get(0));
+               // System.out.println(entry.getValue().get(0));
                 if(entry.getValue().contains(arrayVehiculos.get(turnoActual))){
+                    System.out.println("MI ID: " + arrayVehiculos.get(turnoActual));
+                    System.out.println("IDs abiertos: ");
+                    for(int i = 0; i < entry.getValue().size(); i++)
+                        System.out.print(entry.getValue().get(i));
+                    
                     abi.add(entry.getKey());
                 }
             }
@@ -261,12 +266,13 @@ public class AgentController extends Agent{
             System.out.println(abi);
             System.out.println(finish);
             
+            System.out.print(ANSI_RED + "abiertos en mapa: ");
             for(int i=0; i < abi.size(); i++){
-                System.out.println(mapa.get(abi.get(i)));
+                System.out.print(ANSI_RED + mapa.get(abi.get(i)));
             }
             
             System.out.println(ANSI_RED + "MAPA DEL CONTROLADOR");
-            Objetivo.printMap(mapa, abi);
+            //Objetivo.printMap(mapa, abi);
             //Objetivo.printMap()
             nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, finish, objetivePos, abi,mapa, vehiclesPositions );
 
@@ -282,8 +288,9 @@ public class AgentController extends Agent{
             System.out.println(nextObj.x + ","+ nextObj.y);
             System.out.println(ANSI_RED + "No esta en el objetivo");
             response.add("next_pos", transformarMapPoint(nextObj));
+            System.out.println(ANSI_RED + arrayVehiculos.get(turnoActual).getLocalName() + "te envío: ");
             
-            System.out.println(response.toString());
+            System.out.print(ANSI_RED + response.toString());
 
             this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
                     "", "");
@@ -306,6 +313,9 @@ public class AgentController extends Agent{
             turnoActual = 0;
         }
         
+        System.out.println("\n\n\n\n" + ANSI_RED + "**********************************************************************\n\n\n\n");
+        System.out.println(ANSI_RED + "********TURNO DE " + this.arrayVehiculos.get(turnoActual).getLocalName() +"\"********\n\n\n\n");
+        System.out.println(ANSI_RED + "**********************************************************************\n\n\n\n");
         this.receiveMessage(); // fin de turno
         
         
@@ -330,7 +340,7 @@ public class AgentController extends Agent{
             }
         }
         
-        System.out.println(ANSI_RED + "PASA EL PRIMER FOR DE ABIERTOS");
+        System.out.println(ANSI_RED + "PASA EL PRIMER FOR DE CERRADOS");
         //System.out.println(ANSI_RED+"abiertos");
         for(int i = 0; i < abiertos.size(); i++){
             //System.out.println(abiertos.get(i));
@@ -350,7 +360,7 @@ public class AgentController extends Agent{
             }
         }
         
-         System.out.println(ANSI_RED + "PASA EL SEGUNDO FOR DE CERRADOS");
+        System.out.println(ANSI_RED + "PASA EL SEGUNDO FOR DE ABIERTOS");
         cerrados.clear();
         abiertos.clear();
         int tamanio = 0;
@@ -366,7 +376,14 @@ public class AgentController extends Agent{
         }
         System.out.println(ANSI_RED + "VA A ENTRAR EN FOR DE ESCRIBIR RADAR");
         System.out.println(ANSI_RED + "POSICION ANTES DE ENTRAR A ESCRIBIR: x:" +posicionVehiculoX + " y: " +posicionVehiculoY);
+        
+        System.out.print(ANSI_RED+ "radar: {");
+       for(int i = 0; i < radar.size(); i++)
+           System.out.print(ANSI_RED+ radar.get(i)+',');
+        System.out.print(ANSI_RED+ "}");
         int index = 0;
+        
+        
             for(int i = posicionVehiculoY-tamanio; i <= posicionVehiculoY+tamanio; i++)
                 for(int j = posicionVehiculoX-tamanio; j <= posicionVehiculoX+tamanio; j++){
                     if(mapa.get(j*m+i) ==0 && radar.get(index) ==1){
@@ -456,7 +473,6 @@ public class AgentController extends Agent{
         ArrayList<String> msg4 = this.receiveMessage();
         System.out.println(ANSI_RED + "tiene 4 idls");
         */
-      System.out.println(ANSI_RED+ "turno de: " + this.arrayVehiculos.get(this.turnoActual).getLocalName());
       this.sendMessage(this.arrayVehiculos.get(this.turnoActual), "", ACLMessage.INFORM, conversationID, "", "");
       
         state = REQUEST_INFO;
