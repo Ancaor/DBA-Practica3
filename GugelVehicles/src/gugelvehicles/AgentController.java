@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car11111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car21111111111111111111111111111111111111111111111111111111111111111111111";
-    String truckAgent_name = "truck11111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron1111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car11111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car21111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String truckAgent_name = "truck11111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron1111111111111111111111111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -262,7 +262,7 @@ public class AgentController extends Agent{
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
                System.out.print(ANSI_RED + "Entrada de abiertos: " + entry.getValue());
                for(int i = 0; i < coincidencias_actual.size(); i++){
-                    if(entry.getValue().contains(coincidencias_actual.get(i))){                    
+                    if(entry.getValue().contains(coincidencias_actual.get(i)) && entry.getValue().size() == 1){                    
                         abi.add(entry.getKey());
                     }
                }
@@ -335,6 +335,7 @@ public class AgentController extends Agent{
         if(turnoActual < arrayVehiculos.size()-1){
             turnoActual++;
             numeroIteraciones++;
+            DrawColor();
         }
         else{
             
@@ -440,7 +441,7 @@ public class AgentController extends Agent{
        }
        //write image
        try{
-           ImageIO.write(img, "png", new File("test_COLOR"+"mapapruebas"+"it"+this.numeroIteraciones+".png"));
+           ImageIO.write(img, "png", new File("./imagenes/test_COLOR"+"mapapruebas"+"it"+this.numeroIteraciones+".png"));
          //f = new File("C:\\Cuarto\\Output.png");
        //  ImageIO.write(img, "png", f);
        }catch(IOException e){

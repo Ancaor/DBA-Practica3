@@ -113,7 +113,7 @@ public class Objetivo {
         Random randomGenerator = new Random();
         int index = randomGenerator.nextInt(masCercanos.size());
         
-        return masCercanos.get(index);
+        return pMasCercano;
     }
     
     public static double distance(MapPoint p1, MapPoint p2){
@@ -388,6 +388,8 @@ public class Objetivo {
         map_visto = mapa;
         abiertos.clear();
         System.out.println("casillas abiertas: ");
+        x_actual = actual_x;
+        y_actual = actual_y;
         for(int i = 0; i <abie.size();i++){
             abiertos.add(iniciarMapPoint(abie.get(i)));
             System.out.print(abiertos.get(i));
@@ -409,6 +411,7 @@ public class Objetivo {
        // printMap(z.map_real,null);
         //MapPoint act = new MapPoint(x_actual,y_actual);
         //printMap(z.map_real, null);
+        
         MapPoint puntoObjetivo = null;
         ArrayList<MapPoint> path = null;
         boolean objetivoDefinido = (objetivo!=-1);
