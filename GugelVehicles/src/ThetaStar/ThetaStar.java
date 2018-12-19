@@ -29,10 +29,14 @@ public class ThetaStar {
     
     public ArrayList<MapPoint> calculateThetaStar(MapPoint start, MapPoint goal){
         System.out.println("GOAL: " + (this.map_real.get(goal.y * this.width + goal.x)));
-        if((this.map_real.get(goal.y * this.width + goal.x) == 1) || (this.map_real.get(goal.y * this.width + goal.x) == -1)){
+        if((this.map_real.get(goal.y * this.width + goal.x) == 1)
+                || (this.map_real.get(goal.y * this.width + goal.x) == -1)
+                || (this.map_real.get(goal.y * this.width + goal.x) == 2)
+                || (this.map_real.get(goal.y * this.width + goal.x) == 4)){
             return null;
         }
-        
+        System.out.println("SIZE MAP: " + map_real.size());
+        System.out.println("GOAL THETA: " + goal + " CONTIENE: " + this.map_real.get(goal.y * this.width + goal.x));
         Comparator<Node> comparator = new ComparatorNode();
         openList = new PriorityQueue<Node>(comparator);
         closedList = new ArrayList<Node>();
@@ -86,10 +90,14 @@ public class ThetaStar {
                         adjPoint = new MapPoint(currentPoint.x-1, currentPoint.y-1);
                     }
                     
-                    
+               /*     
                     if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) != -1) && 
                             (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 1) && 
-                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 2)){
+                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 2) &&
+                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) != 4)){
+*/
+                    if((this.map_real.get(adjPoint.y * this.width + adjPoint.x) == 0) ||
+                            (this.map_real.get(adjPoint.y * this.width + adjPoint.x) == 3)){
                        Node adjNode = new Node(adjPoint,currentNode);
                        adjNode.calculateValues(goal);
                  //      System.out.println("ENTRA EN IF: " + this.map_real.get(adjPoint.y * this.width + adjPoint.x));

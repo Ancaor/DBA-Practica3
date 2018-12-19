@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import ThetaStar.*;
+import java.util.Random;
 
 /**
  *
@@ -60,34 +61,59 @@ public class Objetivo {
        
     public static MapPoint abiertoMasCercano(){
    
-        MapPoint pMasCercano = abiertos.get(0);
+        MapPoint pMasCercano = abiertos.get(0);        
+        ArrayList<MapPoint> masCercanos = new ArrayList<MapPoint>();
+        masCercanos.add(pMasCercano);
         MapPoint pActual = new MapPoint(x_actual, y_actual);
         double distanciaMenor = distance(pMasCercano, pActual);
         
+        System.out.println("LLEGA SIZE cercanos: " + masCercanos.size());
         for(int i = 1; i < abiertos.size(); i++){
+       //     System.out.println("Entra en for i: " + i);
             if(distance(abiertos.get(i),pActual) < distanciaMenor){
+        
                 distanciaMenor = distance(abiertos.get(i),pActual);
                 pMasCercano = abiertos.get(i);
+                masCercanos.clear();
             }
+            
+            if(distance(abiertos.get(i),pActual) == distanciaMenor){
+                masCercanos.add(abiertos.get(i));
+            }
+            
         }
         
-        return pMasCercano;
+        Random randomGenerator = new Random();
+        int index = randomGenerator.nextInt(masCercanos.size());
+        System.out.println("TAMANIO CERCANOS: " + masCercanos.size() + " INDEX RANDOM: " + index);
+        return abiertos.get(index);
+       // return pMasCercano;
     }
     
     public static MapPoint abiertoMasCercanoFin(){
-   
+
         MapPoint pMasCercano = abiertos.get(0);
+        ArrayList<MapPoint> masCercanos = new ArrayList<>();
+        masCercanos.add(pMasCercano);
         
         double distanciaMenor = distance(pMasCercano, pFin);
         
         for(int i = 1; i < abiertos.size(); i++){
+           
             if(distance(abiertos.get(i),pFin) < distanciaMenor){
                 distanciaMenor = distance(abiertos.get(i),pFin);
                 pMasCercano = abiertos.get(i);
+                masCercanos.clear();
+            }
+            if(distance(abiertos.get(i),pFin) == distanciaMenor){
+                masCercanos.add(abiertos.get(i));
             }
         }
         
-        return pMasCercano;
+        Random randomGenerator = new Random();
+        int index = randomGenerator.nextInt(masCercanos.size());
+        
+        return masCercanos.get(index);
     }
     
     public static double distance(MapPoint p1, MapPoint p2){
@@ -311,23 +337,24 @@ public class Objetivo {
     
     public static void printMap(ArrayList<Integer> map, ArrayList<Integer> abiert){
         System.out.println(" ");
-        for(int j = 0; j < 510; j++){
-            for(int i = 0; i < 510; i++){
+        for(int j = 0; j < 110; j++){
+            for(int i = 0; i < 110; i++){
                 
                 System.out.print(map.get(j*510+i));
                 
             }
             System.out.println("");
         }
-        for(int i = 0; i < 510; i++){
-            for(int j = 0; j < 510; j++){
+        /*
+        for(int i = 0; i < 110; i++){
+            for(int j = 0; j < 110; j++){
                 
                 //System.out.print(map.get(j*510+i));
                 if(map.get(j*510+i) == 2){
                     //  System.out.println("MURO EXTERIOR EN i(x): " + i + " j(y): " + j);
                 }
                 
-                
+                /*
                 if(map.get(j*510+i) == 4){
                     System.out.println("VEHICULO EN i(x): " + i + " j(y): " + j);
                     System.out.println("A SU DERECHA HAY UN: " +  map.get(j*510+i+1));
@@ -335,11 +362,13 @@ public class Objetivo {
                     System.out.println("ARRIBA HAY UN: " +  map.get((j-1)*510+i));
                     System.out.println("ABAJO HAY UN: " +  map.get((j+1)*510+i));        
                 }
+                *//*
             }
+            */
            // System.out.println("");
         
         
-        }
+        //}
         
                 
      /*   
@@ -351,9 +380,10 @@ public class Objetivo {
             System.out.print("\n");
         }
         */
+    
     }
     
-    public MapPoint nextPosition(int actual_x,int actual_y, boolean objetivoDefinido, int objetivo, ArrayList<Integer> abie, ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
+    public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie, ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
         
         map_visto = mapa;
         abiertos.clear();
@@ -367,22 +397,30 @@ public class Objetivo {
         System.out.println("MAPA DE OBJETIVO");
         System.out.println("OBJETIVO|| x_actual: " + actual_x + " y_actual: " +actual_y);
         //printMap(mapa,abie);
-        /*
+    
+
+        
         for(int i = 0; i <vehiclePosition.size();i++){
-         map_visto.set(vehiclePosition.get(i).y*504+vehiclePosition.get(i).x, 1);           
+         map_visto.set(vehiclePosition.get(i).y*510+vehiclePosition.get(i).x, 1);           
         }
-*/
+
         
-        ThetaStar z = new ThetaStar(m_real, mapa);
-        
+        ThetaStar z = new ThetaStar(m_real, map_visto);
+       // printMap(z.map_real,null);
         //MapPoint act = new MapPoint(x_actual,y_actual);
         //printMap(z.map_real, null);
         MapPoint puntoObjetivo = null;
         ArrayList<MapPoint> path = null;
-        
+        boolean objetivoDefinido = (objetivo!=-1);
+        if(objetivoDefinido){
+            path = z.calculateThetaStar(new MapPoint(actual_x, actual_y), iniciarMapPoint(objetivo));
+        }
         
         while(path == null){
-            z = new ThetaStar(m_real, mapa);
+            z = new ThetaStar(m_real, map_visto);
+           // printMap(z.map_real,null);
+          //  System.out.println("QUE HAY EN EL PUTO PUNTO: " + map_real.get(puntoObjetivo.y*m_real+puntoObjetivo.x));
+
             
             if(!objetivoDefinido){
                 puntoObjetivo = abiertoMasCercano();
@@ -391,13 +429,16 @@ public class Objetivo {
                 pFin = iniciarMapPoint(objetivo);
                 puntoObjetivo = abiertoMasCercanoFin();
             }
+   
             path = z.calculateThetaStar(new MapPoint(actual_x, actual_y), puntoObjetivo);
+           
+            
             System.out.println("PObjetivo: " + puntoObjetivo + " Path: " + path + 
                     " que hay en ese punto: " + mapa.get(puntoObjetivo.y*m_real+puntoObjetivo.x));
             if(path == null){
                 abiertos.remove(abiertos.indexOf(puntoObjetivo));
             }else{
-                puntoObjetivo = path.get(path.size()-1);
+                puntoObjetivo = path.get(0);
             }
         }
         

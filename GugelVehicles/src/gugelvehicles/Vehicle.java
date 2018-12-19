@@ -349,8 +349,11 @@ public class Vehicle extends Agent{
             message.add("command", "refuel");
             System.out.println(ANSI + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST, conversationID, this.reply_with_server, "");
-        }else{
-            
+            ArrayList<String> response = this.receiveMessage();
+            this.reply_with_server =  response.get(2);
+
+        }
+            message = Json.object();
             message.add("command", this.next_pos);
             
             System.out.println(ANSI + "conversationID: " + conversationID);
@@ -361,7 +364,7 @@ public class Vehicle extends Agent{
             System.out.println(ANSI + "ENVIANDO MENSAJE A SERVER");
             this.sendMessage(serverAgent, message.toString(), ACLMessage.REQUEST , conversationID, this.reply_with_server, "");
             
-        }
+        
         
         ArrayList<String> response = this.receiveMessage();
         System.out.println(ANSI + "Recibido");
