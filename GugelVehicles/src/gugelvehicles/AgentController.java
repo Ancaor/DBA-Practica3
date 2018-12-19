@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car211111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String truckAgent_name = "truck11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car1_1";
+    String car2Agent_name = "car2_1";
+    String truckAgent_name = "truck_1";
+    String dronAgent_name = "dron_1";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -133,6 +133,8 @@ public class AgentController extends Agent{
         this.serverAgent = server_id;
         this.state = AWAKE_AGENTS;
         
+        this.objetivePos = -1;
+        
         initMap(mapa);
         
     }
@@ -222,24 +224,63 @@ public class AgentController extends Agent{
     }
     
     private boolean IsOnObjetive(){
+        if(this.objetivePos == -1)
+            return false;
+        else{
+            int posicion_vehiculo = this.posicionVehiculoY * tamanio_mapa + this.posicionVehiculoX;
+    
+            return posicion_vehiculo == objetivePos;
+
+        }
+    }
+    
+    private int convertRadarToPosition(int i_local, int j_local){
+        int pos_real = 0;
+        
+        int tamanio = 0;
+        
         if(radar.size() == 9){
-            if(radar.get(4) == 3)
-                return true;
-            else
-                return false;
+            tamanio = 1;
         }
         else if(radar.size() == 25){
-             if(radar.get(12) == 3)
-                return true;
-            else
-                return false;
+            tamanio = 2;
         }    
         else{
-             if(radar.get(60) == 3)
-                return true;
-            else
-                return false;
+            tamanio = 5;
         }
+        
+        int i_real = this.posicionVehiculoY - tamanio + i_local;
+        int j_real = this.posicionVehiculoX - tamanio + j_local;
+        
+        pos_real = i_real * tamanio_mapa + j_real; 
+        
+        
+        return pos_real;
+    }
+    
+    private void cambiaObjetivePos(){
+    
+        int range = 0;
+        switch(this.radar.size()){
+            case 9: range = 3; break;
+            case 25: range = 5; break;
+            case 121: range = 11; break;
+        }
+        
+        boolean encontrado = false;
+        
+        
+        for(int i=0; i < range && !encontrado; i++){                
+            for(int j=0; j < range && !encontrado; j++){
+                    if(this.radar.get((range*i)+j) == 3){
+                        this.objetivePos = this.convertRadarToPosition(i, j);
+                        System.out.println(ANSI_RED + "El nuevo objetivo esta en " + this.objetivePos);
+                        encontrado = true;
+                    }
+            }
+                        
+        }
+        
     }
     
     private void selectPosition(){
@@ -251,7 +292,14 @@ public class AgentController extends Agent{
             ArrayList<Integer> abi = new ArrayList<>();
             ArrayList<Integer> cer = new ArrayList<>();
             
-            ArrayList<AgentID> coincidencias_actual = this.coincidencias.get(this.turnoActual);
+            int indexCoincidenciasActual = -1;
+        
+            for(int i = 0; i < this.coincidencias.size(); i++){
+                if(this.arrayVehiculos.get(turnoActual) == this.coincidencias.get(i).get(0) )
+                   indexCoincidenciasActual = i;
+            }
+            
+            ArrayList<AgentID> coincidencias_actual = this.coincidencias.get(indexCoincidenciasActual);
             
             System.out.println("Tamaño map abiertos: " + abiertosFinal.size());
             System.out.println(ANSI_RED + "COINCIDENCIAS: ");
@@ -330,8 +378,19 @@ public class AgentController extends Agent{
             
             this.sendMessage(arrayVehiculos.get(turnoActual), response.toString(), ACLMessage.REQUEST, conversationID,
                     "", "");
+            
+            this.arrayVehiculos.remove(turnoActual);
+            this.turnoActual--;
+            System.out.println(ANSI_RED + "ARRAY DE VEHICULOS: " + this.arrayVehiculos);
+            
+            this.cambiaObjetivePos();
         }
 
+        
+        
+        
+        
+        
         if(turnoActual < arrayVehiculos.size()-1){
             turnoActual++;
             numeroIteraciones++;
@@ -346,9 +405,13 @@ public class AgentController extends Agent{
         System.out.println(ANSI_RED + "********TURNO DE " + this.arrayVehiculos.get(turnoActual).getLocalName() +"\"********\n\n\n\n");
         System.out.println(ANSI_RED + "**********************************************************************\n\n\n\n");
         this.receiveMessage(); // fin de turno
+        
         vehiclesPositions.set(turnoActual, nextObj);  // MAL
         
-        state = WAIT_IDLE;
+        if(this.arrayVehiculos.size() == 0)
+            this.state = FINISH;
+        else
+            this.state = WAIT_IDLE;
     }
     
     public void DrawColor(){
@@ -453,6 +516,15 @@ public class AgentController extends Agent{
     
     private void updateInfo(){
         System.out.println(ANSI_RED+"esta en update info");
+        
+        int indexCoincidenciasActual = -1;
+        
+        for(int i = 0; i < this.coincidencias.size(); i++){
+            if(this.arrayVehiculos.get(turnoActual) == this.coincidencias.get(i).get(0) )
+                indexCoincidenciasActual = i;
+        }
+                
+        
         for(int i = 0; i < cerrados.size(); i++){
             //System.out.println(cerrados.get(i));
             ArrayList<AgentID> coincidencias = new ArrayList<>();
@@ -485,14 +557,18 @@ public class AgentController extends Agent{
                     //coincidencias = abiertosFinal.get(abiertos.get(i));
                     for(int j = 0; j < auxs.size(); j++){
                         AgentID aux = auxs.get(j);
-                        if(!this.coincidencias.get(turnoActual).contains(aux)){
+                        if(!this.coincidencias.get(indexCoincidenciasActual).contains(aux)){
                             System.out.println("Se juntan caminos de " + aux + " y " + this.arrayVehiculos.get(this.turnoActual) );
-                            this.coincidencias.get(turnoActual).add(aux);
+                            this.coincidencias.get(indexCoincidenciasActual).add(aux);
                         }
-                        int turnoOtro = arrayVehiculos.indexOf(aux);
-                        if(!this.coincidencias.get(turnoOtro).contains(arrayVehiculos.get(turnoActual))){
+                        int indexOtro = -1;
+                        for(int k = 0; k < this.coincidencias.size(); k++){
+                            if(aux == this.coincidencias.get(k).get(0) )
+                            indexOtro = k;
+                        }
+                        if(!this.coincidencias.get(indexOtro).contains(arrayVehiculos.get(turnoActual))){
                             System.out.println("Se juntan caminos de " + aux + " y " + this.arrayVehiculos.get(this.turnoActual) );
-                            this.coincidencias.get(turnoOtro).add(arrayVehiculos.get(turnoActual));
+                            this.coincidencias.get(indexOtro).add(arrayVehiculos.get(turnoActual));
                         }
                     }
       
@@ -591,6 +667,12 @@ public class AgentController extends Agent{
         System.out.println(ANSI_RED+turnoActual);
 
         
+        if(this.objetivePos == -1)
+            this.objetivePos = object.get("objetive_pos").asInt();
+        else
+            System.out.println("HA ENCONTRADO EL OBJETIVO");
+        
+       /* 
         if(object.get("objetive_pos").asInt() != -1){
           //  this.objetivePos = object.get("objetive_pos").asInt();
             this.objetivePos = 55*510+55;
@@ -599,7 +681,7 @@ public class AgentController extends Agent{
         else{
             this.objetivePos = 55*510+55;
         }
-        
+        */
         JsonArray radarJson = object.get("radar").asArray();
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
         
@@ -641,14 +723,14 @@ public class AgentController extends Agent{
 
     private void finish() {
         this.finish=true;
-        
+        /*
         // RECEIVE DE LOS COCHES ANTES DE FINALIZAR PARA QUE NO CIERRE LA SESION
         this.receiveMessage();
         this.receiveMessage();
         this.receiveMessage();
         this.receiveMessage();
         ////////////////////////////////////////////////////////////////////////
-        
+        */
         this.sendMessage(this.serverAgent, "", ACLMessage.CANCEL, "","", "");
         
         ArrayList<String> agree = this.receiveMessage();

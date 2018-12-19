@@ -175,6 +175,10 @@ public class Vehicle extends Agent{
     }
 
     private void finish() {
+        JsonObject message = Json.object();
+        message.add("state", "FIN_TURNO");        
+        this.sendMessage(controllerAgent, message.toString(), ACLMessage.INFORM, conversationID, "", "");
+        
         this.finish=true;
         
     }
