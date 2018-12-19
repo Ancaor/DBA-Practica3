@@ -110,10 +110,10 @@ public class Objetivo {
                 masCercanos.add(abiertos.get(i));
             }
         }
-        
+       
         Random randomGenerator = new Random();
         int index = randomGenerator.nextInt(masCercanos.size());
-        
+        System.out.println("pMasCercano: " + pMasCercano + " Distancia: " + distanciaMenor);
         return pMasCercano;
     }
     
@@ -418,10 +418,15 @@ public class Objetivo {
         boolean objetivoDefinido = (objetivo!=-1);
         if(objetivoDefinido){
             path = z.calculateThetaStar(new MapPoint(actual_x, actual_y), iniciarMapPoint(objetivo));
+            if(path != null){
+             System.out.println("VUELVE DEL PATH OBJETIVO CON SIZE: " + path);
+             puntoObjetivo = path.get(0);
+            }
         }
         
         while(path == null){
             z = new ThetaStar(m_real, map_visto);
+          //  printMap(z.map_real,null);
            // printMap(z.map_real,null);
           //  System.out.println("QUE HAY EN EL PUTO PUNTO: " + map_real.get(puntoObjetivo.y*m_real+puntoObjetivo.x));
 
@@ -435,7 +440,7 @@ public class Objetivo {
             }
    
             path = z.calculateThetaStar(new MapPoint(actual_x, actual_y), puntoObjetivo);
-           
+           System.out.println("VUELVE DEL PATH CON SIZE: " + path);
             
             System.out.println("PObjetivo: " + puntoObjetivo + " Path: " + path + 
                     " que hay en ese punto: " + mapa.get(puntoObjetivo.y*m_real+puntoObjetivo.x));

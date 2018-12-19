@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String car2Agent_name = "car21111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String truckAgent_name = "truck1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-    String dronAgent_name = "dron1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car1Agent_name = "car11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String car2Agent_name = "car211111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String truckAgent_name = "truck11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+    String dronAgent_name = "dron11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -302,7 +302,7 @@ public class AgentController extends Agent{
             System.out.println(ANSI_RED + "POSOCUPADAS: " + posOcupadas.toString());
             nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, objetivePos, abi,mapa, posOcupadas );
 
-            System.out.println(ANSI_RED + "No esta en el objetivo");
+            System.out.println(ANSI_RED + "nextObj: " + nextObj);
             //////////////////////////////////////////////
             
             nextPositions.set(turnoActual, nextObj);
@@ -592,11 +592,12 @@ public class AgentController extends Agent{
 
         
         if(object.get("objetive_pos").asInt() != -1){
-            this.objetivePos = object.get("objetive_pos").asInt();
+          //  this.objetivePos = object.get("objetive_pos").asInt();
+            this.objetivePos = 55*510+55;
             System.out.println("HA ENCONTRADO EL OBJETIVO");
         }
         else{
-            this.objetivePos = -1;
+            this.objetivePos = 55*510+55;
         }
         
         JsonArray radarJson = object.get("radar").asArray();
@@ -681,7 +682,7 @@ public class AgentController extends Agent{
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
-        contenido = Json.object().add("world","map2");
+        contenido = Json.object().add("world","map1");
         
         this.sendMessage(serverAgent, contenido.toString(), ACLMessage.SUBSCRIBE, "","" ,"");
         System.out.println(ANSI_RED + "Mensaje_suscripcion enviado");

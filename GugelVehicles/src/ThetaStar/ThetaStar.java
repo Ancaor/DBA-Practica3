@@ -44,7 +44,9 @@ public class ThetaStar {
         currentNode.parent = currentNode;
         currentNode.calculateValues(goal);
         openList.add(currentNode);
+        System.out.println("VA A ENTRAR EN WHILE" );
         
+
         while(!openList.isEmpty()){
            // System.out.println("SIZE ANTES DE POLL: " + openList.size());
             currentNode = openList.poll();
