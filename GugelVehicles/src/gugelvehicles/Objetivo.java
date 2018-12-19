@@ -70,6 +70,7 @@ public class Objetivo {
         System.out.println("LLEGA SIZE cercanos: " + masCercanos.size());
         for(int i = 1; i < abiertos.size(); i++){
        //     System.out.println("Entra en for i: " + i);
+         //   System.out.println("DISTANCIA ACTUAL: " + distance(abiertos.get(i),pActual) + " DISTANCIA MENOR: " + distanciaMenor);   
             if(distance(abiertos.get(i),pActual) < distanciaMenor){
         
                 distanciaMenor = distance(abiertos.get(i),pActual);
@@ -85,9 +86,9 @@ public class Objetivo {
         
         Random randomGenerator = new Random();
         int index = randomGenerator.nextInt(masCercanos.size());
-        System.out.println("TAMANIO CERCANOS: " + masCercanos.size() + " INDEX RANDOM: " + index);
-        return abiertos.get(index);
-       // return pMasCercano;
+  //      System.out.println("TAMANIO CERCANOS: " + masCercanos.size() + " INDEX RANDOM: " + index);
+        //return abiertos.get(index);
+        return pMasCercano;
     }
     
     public static MapPoint abiertoMasCercanoFin(){
