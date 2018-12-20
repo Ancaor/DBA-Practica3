@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  *
- * @author Anton
+ * @author Antonio José Camarero Ortega
  */
 public class AgentController extends Agent{
     
@@ -239,24 +239,6 @@ public class AgentController extends Agent{
         else      
             return "moveSE";     
 
-       /* 
-        if((m.y > this.posicionVehiculoY) && (m.x > this.posicionVehiculoX))
-            return "moveNW";
-        else if(m.y > this.posicionVehiculoY && m.x == this.posicionVehiculoX)
-            return "moveN"; 
-        else if(m.y > this.posicionVehiculoY && m.x < this.posicionVehiculoX)
-            return "moveNE";
-        else if(m.y == this.posicionVehiculoY && m.x > this.posicionVehiculoX)
-            return "moveW";
-        else if(m.y == this.posicionVehiculoY && m.x < this.posicionVehiculoX)
-            return "moveE";
-        else if(m.y < this.posicionVehiculoY && m.x > this.posicionVehiculoX)        
-            return "moveSW";   
-        else if(m.y < this.posicionVehiculoY && m.x == this.posicionVehiculoX)        
-            return "moveS";    
-        else      
-            return "moveSE";
-        */
     }
    
     public double distance(MapPoint p1, MapPoint p2){
@@ -464,6 +446,11 @@ public class AgentController extends Agent{
             this.state = WAIT_IDLE;
     }
     
+        /**
+
+ * 
+ * @author Antonio José Camarero Ortega
+ */
         public void DrawColor(){
        //image dimension
        int width = this.tamanio_real_mapa;
@@ -802,7 +789,11 @@ public class AgentController extends Agent{
         }
         
     }
+            /**
 
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     private void finish() {
         this.finish=true;
         /*
@@ -842,7 +833,11 @@ public class AgentController extends Agent{
                 System.out.println(ANSI_RED+"Error procesando traza");
             }
     }
-    
+            /**
+
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
@@ -880,7 +875,11 @@ public class AgentController extends Agent{
         }
         
     }
+        /**
 
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     private void awakeAgents() {
         try {
             this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
@@ -899,7 +898,11 @@ public class AgentController extends Agent{
         state = SUSCRIBE;
         
     }
+        /**
 
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     private void requestCheckin() {
         
         JsonObject contenido = new JsonObject(); 
@@ -913,7 +916,11 @@ public class AgentController extends Agent{
         //state=WAIT_CHECKIN;
         state = WAIT_CHECKIN;
     }
+        /**
 
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     private void waitCheckin() {
         System.out.println(ANSI_RED+"controller esperando mensaje");
         ArrayList<String> checkin1 = this.receiveMessage();
@@ -977,7 +984,11 @@ public class AgentController extends Agent{
         }
         
     }
-    
+            /**
+
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     public void next_iteration(){
         JsonObject contenido = new JsonObject(); 
         contenido = Json.object().add("command","START");
@@ -989,7 +1000,11 @@ public class AgentController extends Agent{
         state= WAIT_IDLE;
     }
     
-    
+            /**
+
+ * 
+ * @author Antonio José Camarero Ortega
+ */
      @Override
     public void execute(){
         while(!finish)
@@ -1047,7 +1062,11 @@ public class AgentController extends Agent{
         }
        System.out.println(ANSI_RED+"------- CONTROLLER FINISHED -------");
     }
-    
+            /**
+
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     public void finish_error(){ 
         this.finish=true; 
          
@@ -1080,7 +1099,11 @@ public class AgentController extends Agent{
                 System.out.println(ANSI_RED+"Error procesando traza"); 
             } 
     } 
+        /**
 
+ * 
+ * @author Antonio José Camarero Ortega
+ */
     private void guardarTraza(String content) {
 BufferedImage im = null; 
         try{ 

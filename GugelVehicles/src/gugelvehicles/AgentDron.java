@@ -5,19 +5,17 @@
  */
 package gugelvehicles;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
-import es.upv.dsic.gti_ia.core.ACLMessage;
+
 import es.upv.dsic.gti_ia.core.AgentID;
-import static gugelvehicles.Agent.ANSI_BLUE;
 import static gugelvehicles.Agent.ANSI_GREEN;
 import java.util.ArrayList;
 
 /**
- *
- * @author Anton
+ * Clase que hereda de Vehiculo
+ * 
+ * Establece el tipo concreto del vehiculo y su nombre.
+ * 
+ * @author Antonio José Camarero Ortega
  */
 public class AgentDron extends Vehicle{
 
@@ -30,6 +28,11 @@ public class AgentDron extends Vehicle{
         this.vehicleTypeName = "Dron";
     }
     
+    /**
+    * Sobreescribe la funcion de calcular cerrados para que no guarde en cerrados los muros pero si los demas vehiculos
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     @Override
     public ArrayList<Integer> calcularCerrados(){
         ArrayList<Integer> cerrados = new ArrayList<>();
