@@ -28,8 +28,10 @@ import ThetaStar.*;
 import java.util.Random;
 
 /**
- *
+ *Clase que decide cual será el siguiente objetivo elegido por el coordinador para un vehiculo
+ * 
  * @author Ruben
+ * @author Pablo
  */
 public class Objetivo {
     private static int vision = 3;
@@ -57,7 +59,12 @@ public class Objetivo {
     private static ArrayList<MapPoint> cerrados = new ArrayList<>();
     private static ArrayList<MapPoint> traza = new ArrayList<>();
    
-     
+ /**
+ *Funcion que busca entre las casillas que pertenecen al ArrayList abiertos la más cercana al vehiculo
+ * 
+ * @author Ruben
+ * @author Pablo
+ */
        
     public static MapPoint abiertoMasCercano(){
    
@@ -90,7 +97,12 @@ public class Objetivo {
         //return abiertos.get(index);
         return pMasCercano;
     }
-    
+    /**
+    * *Funcion que busca entre las casillas que pertenecen al ArrayList abiertos la más cercana al destino
+    * 
+    * @author Ruben
+    * @author Pablo
+    */
     public static MapPoint abiertoMasCercanoFin(){
 
         MapPoint pMasCercano = abiertos.get(0);
@@ -117,13 +129,23 @@ public class Objetivo {
         return pMasCercano;
     }
     
+    /**
+    * *Funcion que calcula la distancia entre dos casillas
+    * 
+    * @author Ruben
+    * @author Pablo
+    */
     public static double distance(MapPoint p1, MapPoint p2){
         int xValue = (p1.x-p2.x)*(p1.x-p2.x);
         int yValue = (p1.y-p2.y)*(p1.y-p2.y);
         return Math.sqrt(xValue+yValue);
     } 
     
-    
+    /**
+    * *Funcion que imprime el mapa en un archivo
+    * 
+    * @author Ruben
+    */
     public static void PrintMapImage(){
         
         byte [][] a = new byte[m_real][n_real];
@@ -156,6 +178,11 @@ public class Objetivo {
        
         
     }
+    /**
+    * *Funcion que dibuja el mapa a color en un archivo
+    * 
+    * @author Ruben
+    */
     
     public static void DrawColor(){
        //image dimension
