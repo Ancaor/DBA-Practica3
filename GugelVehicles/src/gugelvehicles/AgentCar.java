@@ -5,18 +5,15 @@
  */
 package gugelvehicles;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
-import edu.emory.mathcs.backport.java.util.Arrays;
-import es.upv.dsic.gti_ia.core.ACLMessage;
+
 import es.upv.dsic.gti_ia.core.AgentID;
-import java.util.ArrayList;
 
 /**
- *
- * @author Anton
+ * Clase que hereda de Vehiculo
+ * 
+ * Establece el tipo concreto del vehiculo y su nombre.
+ * 
+ * @author Antonio José Camarero Ortega
  */
 public class AgentCar extends Vehicle {
 

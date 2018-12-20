@@ -9,8 +9,11 @@ import es.upv.dsic.gti_ia.core.AgentID;
 import static gugelvehicles.Agent.ANSI_PURPLE;
 
 /**
- *
- * @author Anton
+ * Clase que hereda de Vehiculo
+ * 
+ * Establece el tipo concreto del vehiculo y su nombre.
+ * 
+ * @author Antonio José Camarero Ortega
  */
 public class AgentTruck extends Vehicle{
 

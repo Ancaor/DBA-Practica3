@@ -195,14 +195,10 @@ public class Vehicle extends Agent{
     /**
     * Finaliza la ejecución del vehiculo
     * 
-    * Una vez respondido analiza las Capabilities y las compara con las capabilities esperadas segun su tipo de vehiculo:
-    * 
-    *   - Si cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:ok y pasa al estado WAIT_CONTROLLER.
-    *   - Si NO cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:error y pasa al estado WAIT_CONTROLLER.
+    * Manda un mensaje al controlador para indicar que acaba su turno y finaliza.
     * 
     * @author Antonio José Camarero Ortega
     */
-
     private void finish() {
         JsonObject message = Json.object();
         message.add("state", "FIN_TURNO");        
@@ -212,6 +208,17 @@ public class Vehicle extends Agent{
         
     }
     
+    
+    /**
+    * Comprueba que las capabilities asignadas al vehiculo son las que debe tener segun su tipo.
+    * 
+    * Se basa en el fuelrate para ver si es correcto o no.
+    * 
+    * 
+    * @author Antonio José Camarero Ortega
+    * 
+    * @return check indica si es o no el tipo correcto de vehiculo.
+    */
     private boolean checkTipoVechivulo(VehicleType vehicleType, JsonValue fuelrate) {
         
         int fuelrate_ = fuelrate.asInt();
@@ -236,6 +243,15 @@ public class Vehicle extends Agent{
         return check;
     }
     
+    /**
+    * Solicita infrmación de lo sensores 
+    * 
+    * Solicita información del mundo y la empaqueta para enviarla al controlador.
+    * Además de la información recibida de sensores esta función obtiene del radar la lista de nodos
+    * abiertos y cerrados, tambien captura la posición del objetivo si este es localizado por el radar.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private void requestWorldInfo() {
         
         System.out.println(ANSI + "Solicita información del mundo");
@@ -281,13 +297,6 @@ public class Vehicle extends Agent{
         
         this.posiciones_Radar = convertRadarToPositions();
         
-      //  for(int i=0; i < radar.size(); i++){
-                
-          //  System.out.print(radar.get(i));
-         //   if((i+1)%this.range == 0)
-            //    System.out.print("\n");
-       // }
-        
         this.enery = result.get("energy").asInt();
         this.goal = result.get("goal").asBoolean();
         
@@ -304,19 +313,11 @@ public class Vehicle extends Agent{
             System.out.println(abiertos.get(i));
         }
        
-        
-        
-        
         int pos_objetivo = obtenerPosObjetivo();
-       // System.out.println("pos_objetivo");
-       // System.out.println(pos_objetivo);
-        
         
         information_package = Json.object();
-        //JsonArray abiertos_json = Json.array();
         
-        
-        
+  
         information_package.add("radar", this.convertToJson(radar));
         information_package.add("abiertos", this.convertToJson(abiertos));
         information_package.add("cerrados", this.convertToJson(cerrados));
@@ -330,24 +331,33 @@ public class Vehicle extends Agent{
         
     }
     
+    /**
+    * Espera a que el controlador le de el turno
+    * 
+    * El vehiculo espera aqui hasta que el controlador le indica que es su turno.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private void waitTurn() {
-        
-       // JsonObject response = Json.object();
-       // response.add("state", "IDLE");
-        
-       // this.sendMessage(controllerAgent, response.toString(), ACLMessage.INFORM, conversationID, "", "");
         System.out.println(ANSI + "Esperando turno");
         ArrayList<String> message = this.receiveMessage();
         System.out.println(ANSI + "tiene el turno");
-        String performativa = message.get(0);
         
-            
-        //this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
-        state=REQUEST_WORLD_INFO;
-        
-        
+        state=REQUEST_WORLD_INFO;  
     }
     
+    
+    /**
+    * Espera la orden de movimiento del controlador
+    * 
+    * El vehiculo manda la información del mundo empaquetada al controlador y espera
+    * que este le responda con el siguiente moviemiento:
+    * 
+    *   -Si el controlador le responde con un next_pos : El vehiculo tiene un movimiento que realizar.
+    *   -Si el controlador le responde con un finish : El vehiculo ya ha llegado al objetivo y puede parar su ejecucion.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private void waitControllerCommand() {
         
         this.sendMessage(controllerAgent, information_package.toString(), ACLMessage.INFORM,this.conversationID , "", "");
@@ -376,6 +386,15 @@ public class Vehicle extends Agent{
 
     }
     
+    /**
+    * Envia la siguiente acción/movimiento al servidor
+    * 
+    * Si la bateria está por debajo del umbral hace un refuel.
+    * Despues de haber hecho refuel o no indica al servidor la dirección a la que se mueve.
+    * Por ultimo indica al controlador el fin del turno y vuelve a esperar turno.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private void sendCommandToServer() {
         
         JsonObject message = Json.object();
@@ -423,6 +442,14 @@ public class Vehicle extends Agent{
         
     }
     
+    /**
+    * Calcula los nodos abiertos del vehiculo
+    * 
+    * Partiendo del radar pasado a posiciones, se comprueban que posciones estan en cerrados y se descartan, el resto
+    * se añaden a abiertos.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     public ArrayList<Integer> calcularAbiertos(ArrayList<Integer> cerrados){
         ArrayList<Integer> abiertos = new ArrayList<>();
         
@@ -446,6 +473,11 @@ public class Vehicle extends Agent{
         return abiertos;
     }
     
+    /**
+    * Pasa cada casilla del radar a una pocición del mapa
+    *  
+    * @author Antonio José Camarero Ortega
+    */
     public ArrayList<Integer> convertRadarToPositions(){
         ArrayList<Integer> posiciones = new ArrayList<>();
         
@@ -470,6 +502,14 @@ public class Vehicle extends Agent{
         return posiciones;
     }
     
+    /**
+    * Calcula nodos cerrados del vehiculo
+    * 
+    * Comprueba el radar y guarda en cerrados las casillas uqe no estan en el borde de la vision del vehiculo,
+    * además analiza los bordes del vehiculo y mete en cerrados tambien las que son muro o limite del mapa.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     public ArrayList<Integer> calcularCerrados(){
         ArrayList<Integer> cerrados = new ArrayList<>();
         
@@ -490,6 +530,11 @@ public class Vehicle extends Agent{
         return cerrados;
     }
 
+    /**
+    * Analiza el radar en busca del objetivo
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private int obtenerPosObjetivo() {
         int posObjetivo = -1;
         
@@ -513,6 +558,11 @@ public class Vehicle extends Agent{
         return posObjetivo;
     }
     
+    /**
+    * Función que convierte un ArrayList en un JsonArray
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     private JsonArray convertToJson(ArrayList<Integer> array){
         JsonArray json = Json.array();
         
@@ -523,6 +573,12 @@ public class Vehicle extends Agent{
         return json;
     }
     
+    
+    /**
+    * Execute del vehiculo
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     @Override
     public void execute(){
         while(!finish)
