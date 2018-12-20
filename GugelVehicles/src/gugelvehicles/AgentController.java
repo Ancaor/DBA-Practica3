@@ -41,10 +41,10 @@ public class AgentController extends Agent{
      
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1_1442444";
-    String car2Agent_name = "car2_1444424";
-    String truckAgent_name = "truck_1424444";
-    String car3Agent_name = "car3_1444244";
+    String car1Agent_name = "car1_1444244444444";
+    String car2Agent_name = "car2_1444442444444";
+    String truckAgent_name = "truck_1442444444444";
+    String car3Agent_name = "car3_1444424444444";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -105,6 +105,7 @@ public class AgentController extends Agent{
     private  static int m = tamanio_mapa;
     private  static int n = tamanio_mapa;
     private boolean goal;
+    private boolean fly;
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
@@ -389,7 +390,14 @@ public class AgentController extends Agent{
             //Objetivo.printMap()
             System.out.println(ANSI_RED + "SIZE POSOCUPADAS: " + posOcupadas.size());
             System.out.println(ANSI_RED + "POSOCUPADAS: " + posOcupadas.toString());
-            nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, objetivePos, abi,mapa, posOcupadas );
+            if(fly){
+                nextObj = proxObj.nextDron(posicionVehiculoX, posicionVehiculoY, objetivePos, abi);
+            }
+            else{
+                nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY,
+                    objetivePos, abi,mapa, posOcupadas);
+            }
+
 
             System.out.println(ANSI_RED + "nextObj: " + nextObj);
             //////////////////////////////////////////////
@@ -438,7 +446,7 @@ public class AgentController extends Agent{
         }
         else{
             numeroIteraciones++;
-            DrawColor();
+           /// DrawColor();
             turnoActual = 0;
         }
         
@@ -755,6 +763,14 @@ public class AgentController extends Agent{
             radar.add(radarJson.get(i).asInt());
         }
         
+        if(radar.size() == 9){
+            fly = true;
+        }
+        
+        else{
+            fly = false;
+        }
+        
         System.out.println(ANSI_RED+"RADAR RECIBIDO: " + radar.toString());
         
         this.state = UPDATE_INFO;
@@ -867,10 +883,10 @@ public class AgentController extends Agent{
 
     private void awakeAgents() {
         try {
-            this.agentCar1 = new AgentTruck(car1Agent,this.serverAgent,this.controllerAgent);
-            this.agentCar2 = new AgentTruck(car2Agent,this.serverAgent,this.controllerAgent);
-            this.agentTruck = new AgentTruck(truckAgent,this.serverAgent,this.controllerAgent);
-            this.agentCar3 = new AgentTruck(car3Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar1 = new AgentDron(car1Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar2 = new AgentDron(car2Agent,this.serverAgent,this.controllerAgent);
+            this.agentTruck = new AgentDron(truckAgent,this.serverAgent,this.controllerAgent);
+            this.agentCar3 = new AgentDron(car3Agent,this.serverAgent,this.controllerAgent);
         } catch (Exception ex) {
             Logger.getLogger(AgentCar.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ANSI_RED+"Error inicializando agentes");

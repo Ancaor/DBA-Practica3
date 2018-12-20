@@ -384,7 +384,20 @@ public class Objetivo {
     
     }
     
-    public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie, ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
+    public MapPoint nextDron(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie){
+        x_actual = actual_x;
+        y_actual = actual_y;
+        abiertos.clear();
+        for(int i = 0; i <abie.size();i++){
+            abiertos.add(iniciarMapPoint(abie.get(i)));
+        }
+        
+        pFin = iniciarMapPoint(objetivo);
+        return abiertoMasCercanoFin();
+    }
+    
+    public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie,
+            ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
         
         map_visto = mapa;
         abiertos.clear();
@@ -395,6 +408,7 @@ public class Objetivo {
             abiertos.add(iniciarMapPoint(abie.get(i)));
             System.out.print(abiertos.get(i));
         }
+
         
 
         System.out.println("MAPA DE OBJETIVO");
@@ -403,8 +417,12 @@ public class Objetivo {
     
 
         
-        for(int i = 0; i <vehiclePosition.size();i++){
-         map_visto.set(vehiclePosition.get(i).y*510+vehiclePosition.get(i).x, 1);           
+        for(int y = 0; y <vehiclePosition.size()/2; y ++){
+            for(int x = 0; x < vehiclePosition.size(); x++){
+                    if(x >= 5 && x<= 106 && y >= 5 && y <=106)
+                        map_visto.set(y*510+x, 0);
+                    
+            }      
         }
 
         
