@@ -393,11 +393,11 @@ public class AgentController extends Agent{
         
         if(turnoActual < arrayVehiculos.size()-1){
             turnoActual++;
-            numeroIteraciones++;
-            DrawColor();
+            
         }
         else{
-            
+            numeroIteraciones++;
+            DrawColor();
             turnoActual = 0;
         }
         
@@ -536,6 +536,27 @@ public class AgentController extends Agent{
             }
             else{
                 coincidencias = cerradosFinal.get(cerrados.get(i));
+                
+                if(this.numeroIteraciones == 0){
+                        
+                        //coincidencias = abiertosFinal.get(abiertos.get(i));
+                        for(int j = 0; j < coincidencias.size(); j++){
+                            AgentID aux = coincidencias.get(j);
+                            if(!this.coincidencias.get(indexCoincidenciasActual).contains(aux)){
+                                System.out.println("Se juntan caminos de " + aux + " y " + this.arrayVehiculos.get(this.turnoActual) );
+                                this.coincidencias.get(indexCoincidenciasActual).add(aux);
+                            }
+                            int indexOtro = -1;
+                            for(int k = 0; k < this.coincidencias.size(); k++){
+                                if(aux == this.coincidencias.get(k).get(0) )
+                                indexOtro = k;
+                            }
+                            if(!this.coincidencias.get(indexOtro).contains(arrayVehiculos.get(turnoActual))){
+                                System.out.println("Se juntan caminos de " + aux + " y " + this.arrayVehiculos.get(this.turnoActual) );
+                                this.coincidencias.get(indexOtro).add(arrayVehiculos.get(turnoActual));
+                            }
+                        }
+                    }
             }
             
             if(!coincidencias.contains(arrayVehiculos.get(turnoActual))){
@@ -571,6 +592,8 @@ public class AgentController extends Agent{
                             this.coincidencias.get(indexOtro).add(arrayVehiculos.get(turnoActual));
                         }
                     }
+                    
+                    
       
                 }
 
@@ -764,7 +787,7 @@ public class AgentController extends Agent{
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
-        contenido = Json.object().add("world","map1");
+        contenido = Json.object().add("world","map2");
         
         this.sendMessage(serverAgent, contenido.toString(), ACLMessage.SUBSCRIBE, "","" ,"");
         System.out.println(ANSI_RED + "Mensaje_suscripcion enviado");

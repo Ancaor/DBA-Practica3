@@ -26,6 +26,7 @@ public class GugelVehicles {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
+        System.out.println("Conectando...");
         AgentsConnection.connect("isg2.ugr.es",6000,SERVER_AGENT.getLocalName(),"Cancer","Kipling",false);
             
         //Agent Car = new AgentCar(CAR_AGENT,SERVER_AGENT);
