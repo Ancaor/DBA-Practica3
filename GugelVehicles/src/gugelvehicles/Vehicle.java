@@ -19,6 +19,7 @@ import java.util.ArrayList;
     * 
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
 
 public class Vehicle extends Agent{
@@ -251,6 +252,7 @@ public class Vehicle extends Agent{
     * abiertos y cerrados, tambien captura la posición del objetivo si este es localizado por el radar.
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     private void requestWorldInfo() {
         
@@ -357,6 +359,7 @@ public class Vehicle extends Agent{
     *   -Si el controlador le responde con un finish : El vehiculo ya ha llegado al objetivo y puede parar su ejecucion.
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     private void waitControllerCommand() {
         
@@ -394,6 +397,7 @@ public class Vehicle extends Agent{
     * Por ultimo indica al controlador el fin del turno y vuelve a esperar turno.
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     private void sendCommandToServer() {
         
@@ -449,6 +453,7 @@ public class Vehicle extends Agent{
     * se añaden a abiertos.
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     public ArrayList<Integer> calcularAbiertos(ArrayList<Integer> cerrados){
         ArrayList<Integer> abiertos = new ArrayList<>();
@@ -477,6 +482,7 @@ public class Vehicle extends Agent{
     * Pasa cada casilla del radar a una pocición del mapa
     *  
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     public ArrayList<Integer> convertRadarToPositions(){
         ArrayList<Integer> posiciones = new ArrayList<>();
@@ -509,6 +515,7 @@ public class Vehicle extends Agent{
     * además analiza los bordes del vehiculo y mete en cerrados tambien las que son muro o limite del mapa.
     * 
     * @author Antonio José Camarero Ortega
+    * @author Rubén Marín Asunción
     */
     public ArrayList<Integer> calcularCerrados(){
         ArrayList<Integer> cerrados = new ArrayList<>();

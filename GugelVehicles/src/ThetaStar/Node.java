@@ -7,7 +7,8 @@ package ThetaStar;
 
 /**
  *
- * @author Ruben
+ * @author Ruben Mogica Garrido
+ * @author Rubén Marín Asunción
  */
 public class Node {
 
