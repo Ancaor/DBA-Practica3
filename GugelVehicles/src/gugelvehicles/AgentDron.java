@@ -38,7 +38,7 @@ public class AgentDron extends Vehicle{
         for(int i=0; i < this.range; i++){                
             for(int j=0; j < this.range; j++){
                 if(i == this.range-1 || j == this.range-1 || i == 0 || j == 0){
-                    if(this.radar.get((this.range*i)+j) == 2)
+                    if(this.radar.get((this.range*i)+j) == 2 ||this.radar.get((this.range*i)+j) == 4)
                         cerrados.add(this.posiciones_Radar.get((this.range*i)+j));
                 }
                 else{
