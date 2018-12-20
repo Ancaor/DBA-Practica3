@@ -35,7 +35,7 @@ public class AgentController extends Agent{
      
     String nombre_mapa = "map10"; 
     boolean objetivoManualActivo = false; 
-    int objetivoManual = 31167; 
+    int objetivoManual = 130305; 
      
     int tamanio_real_mapa; 
      
@@ -883,10 +883,10 @@ public class AgentController extends Agent{
 
     private void awakeAgents() {
         try {
-            this.agentCar1 = new AgentTruck(car1Agent,this.serverAgent,this.controllerAgent);
-            this.agentCar2 = new AgentTruck(car2Agent,this.serverAgent,this.controllerAgent);
-            this.agentTruck = new AgentTruck(truckAgent,this.serverAgent,this.controllerAgent);
-            this.agentCar3 = new AgentTruck(car3Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar2 = new AgentCar(car2Agent,this.serverAgent,this.controllerAgent);
+            this.agentTruck = new AgentCar(truckAgent,this.serverAgent,this.controllerAgent);
+            this.agentCar3 = new AgentCar(car3Agent,this.serverAgent,this.controllerAgent);
         } catch (Exception ex) {
             Logger.getLogger(AgentCar.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ANSI_RED+"Error inicializando agentes");
