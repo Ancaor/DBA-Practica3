@@ -101,6 +101,7 @@ public class AgentController extends Agent{
     private  static int m = tamanio_mapa;
     private  static int n = tamanio_mapa;
     private boolean goal;
+    private boolean fly = false;
     
     
     /**
@@ -449,7 +450,8 @@ public class AgentController extends Agent{
                 System.out.println(ANSI_RED + "SIZE POSOCUPADAS: " + posOcupadas.size());
                 System.out.println(ANSI_RED + "POSOCUPADAS: " + posOcupadas.toString());
             }
-            nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, objetivePos, abi,mapa, posOcupadas );
+            nextObj = proxObj.nextPosition(posicionVehiculoX,posicionVehiculoY, objetivePos,
+                    abi,mapa, posOcupadas, fly);
 
             if(DEBUG)
                 System.out.println(ANSI_RED + "nextObj: " + nextObj);
@@ -823,6 +825,13 @@ public class AgentController extends Agent{
         
         for(int i = 0; i < radarJson.size(); i++){
             radar.add(radarJson.get(i).asInt());
+        }
+        
+        if(radar.size() == 9){
+            fly = true;
+        }
+        else{
+            fly = false;
         }
         
         if(DEBUG)

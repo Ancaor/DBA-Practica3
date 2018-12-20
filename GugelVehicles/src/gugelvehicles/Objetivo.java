@@ -411,7 +411,8 @@ public class Objetivo {
     
     }
     
-    public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie, ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
+    public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie,
+            ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition, boolean volador) {
         
         map_visto = mapa;
         abiertos.clear();
@@ -420,10 +421,17 @@ public class Objetivo {
         y_actual = actual_y;
         for(int i = 0; i <abie.size();i++){
             abiertos.add(iniciarMapPoint(abie.get(i)));
+    
             System.out.print(abiertos.get(i));
         }
         
 
+        if(volador){
+            for(int i = 0; i < map_visto.size(); i++){
+                map_visto.set(i,0);
+            }
+        }
+        
         System.out.println("MAPA DE OBJETIVO");
         System.out.println("OBJETIVO|| x_actual: " + actual_x + " y_actual: " +actual_y);
         //printMap(mapa,abie);
@@ -431,7 +439,8 @@ public class Objetivo {
 
         
         for(int i = 0; i <vehiclePosition.size();i++){
-         map_visto.set(vehiclePosition.get(i).y*510+vehiclePosition.get(i).x, 1);           
+
+            map_visto.set(vehiclePosition.get(i).y*510+vehiclePosition.get(i).x, 1);           
         }
 
         
