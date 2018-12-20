@@ -29,11 +29,22 @@ import java.util.Map;
  */
 public class AgentController extends Agent{
     
+    
+     ArrayList<String> nombres_mapas = new ArrayList<>(); 
+     
+     
+    String nombre_mapa = "map8"; 
+    boolean objetivoManualActivo = true; 
+    int objetivoManual = 22994; 
+     
+    int tamanio_real_mapa; 
+     
+    
     private AgentID serverAgent;
-    String car1Agent_name = "car1_144244";
-    String car2Agent_name = "car2_144442";
-    String truckAgent_name = "truck_142444";
-    String car3Agent_name = "car3_144424";
+    String car1Agent_name = "car1_1442444";
+    String car2Agent_name = "car2_1444424";
+    String truckAgent_name = "truck_1424444";
+    String car3Agent_name = "car3_1444244";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -71,8 +82,8 @@ public class AgentController extends Agent{
     private ArrayList<AgentID> arrayVehiculos = new ArrayList<>();
     private ArrayList<Integer> abiertos = new ArrayList<>();
     private ArrayList<Integer> cerrados = new ArrayList<>();
-    private HashMap<Integer, ArrayList<AgentID>> abiertosFinal = new HashMap<>();
-    private HashMap<Integer, ArrayList<AgentID>> cerradosFinal = new HashMap<>();
+    private HashMap<Integer, ArrayList<AgentID>> MapaAbiertos = new HashMap<>();
+    private HashMap<Integer, ArrayList<AgentID>> MapaCerrados = new HashMap<>();
     private ArrayList<Integer> mapa = new ArrayList<>();
     private ArrayList<Integer> radar = new ArrayList<>();
     private int posicionVehiculoX;
@@ -97,6 +108,35 @@ public class AgentController extends Agent{
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
+        
+        
+        this.nombres_mapas.add("map1"); 
+        this.nombres_mapas.add("map2"); 
+        this.nombres_mapas.add("map3"); 
+        this.nombres_mapas.add("map4"); 
+        this.nombres_mapas.add("map5"); 
+        this.nombres_mapas.add("map6"); 
+        this.nombres_mapas.add("map7"); 
+        this.nombres_mapas.add("map8"); 
+        this.nombres_mapas.add("map9"); 
+        this.nombres_mapas.add("map10"); 
+         
+         
+        int indiceMapa = this.nombres_mapas.indexOf(this.nombre_mapa); 
+         
+        switch(indiceMapa){ 
+            case 0: tamanio_real_mapa = 110; break; 
+            case 1: tamanio_real_mapa = 110; break; 
+            case 2: tamanio_real_mapa = 110; break; 
+            case 3: tamanio_real_mapa = 110; break; 
+            case 4: tamanio_real_mapa = 110; break; 
+            case 5: tamanio_real_mapa = 160; break; 
+            case 6: tamanio_real_mapa = 110; break; 
+            case 7: tamanio_real_mapa = 110; break; 
+            case 8: tamanio_real_mapa = 160; break; 
+            case 9: tamanio_real_mapa = 510; break; 
+        } 
+        
         this.arrayVehiculos.add(this.car1Agent);
         this.arrayVehiculos.add(this.car2Agent);
         this.arrayVehiculos.add(this.truckAgent);
@@ -302,13 +342,13 @@ public class AgentController extends Agent{
             
             ArrayList<AgentID> coincidencias_actual = this.coincidencias.get(indexCoincidenciasActual);
             
-            System.out.println("Tamaño map abiertos: " + abiertosFinal.size());
+            System.out.println("Tamaño map abiertos: " + MapaAbiertos.size());
             System.out.println(ANSI_RED + "COINCIDENCIAS: ");
             System.out.print(ANSI_RED + coincidencias_actual.get(0));
            // for(int i = 0; i < coincidencias_actual.size(); i++)
               //  System.out.print(ANSI_RED + coincidencias_actual.get(i));
 
-            for(Map.Entry<Integer, ArrayList<AgentID>> entry : abiertosFinal.entrySet()){
+            for(Map.Entry<Integer, ArrayList<AgentID>> entry : MapaAbiertos.entrySet()){
                System.out.print(ANSI_RED + "Entrada de abiertos: " + entry.getValue());
                for(int i = 0; i < coincidencias_actual.size(); i++){
                     if(entry.getValue().contains(coincidencias_actual.get(i))){                    
@@ -416,10 +456,12 @@ public class AgentController extends Agent{
             this.state = WAIT_IDLE;
     }
     
-    public void DrawColor(){
+        public void DrawColor(){
        //image dimension
-       int width = 510;
-       int height = 510;
+       int width = this.tamanio_real_mapa;
+       int height = this.tamanio_real_mapa;
+       int tamanio_matriz = 510;
+       
        //create buffered image object img
        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
        //file object
@@ -444,7 +486,7 @@ public class AgentController extends Agent{
            //Pintar mapa de abiertos y cerrados
             for(int x = 0; x < width; x++){
 
-                if(abiertosFinal.containsKey(y*width+x)){
+                if(MapaAbiertos.containsKey(y*tamanio_matriz+x)){
                  int a = 255; //alpha
                  int r = 255;
                  int g = 255;
@@ -455,7 +497,7 @@ public class AgentController extends Agent{
                  img.setRGB(x, y, p);
                 }
                 
-            if(cerradosFinal.containsKey(y*width+x)){
+            if(MapaCerrados.containsKey(y*tamanio_matriz+x)){
                  int a = 255; //alpha
                  int r = 255;
                  int g = 0;
@@ -466,7 +508,7 @@ public class AgentController extends Agent{
                  img.setRGB(x, y, p);
                 }
             
-                if((mapa.get(y*width+x) == 1) || (mapa.get(y*width+x) == -1) || (mapa.get(y*width+x) == 2) || (mapa.get(y*width+x) == 3)){
+                if((mapa.get(y*tamanio_matriz+x) == 1) || (mapa.get(y*tamanio_matriz+x) == -1) || (mapa.get(y*tamanio_matriz+x) == 2) || (mapa.get(y*tamanio_matriz+x) == 3)){
                     int a = 255; //alpha
                     int r = 0;
                     int g = 0;
@@ -486,14 +528,6 @@ public class AgentController extends Agent{
            int r = 0;
            int g = 255;
            int b = 0;
-       /*
-           if(traza.contains(new MapPoint(y,x))){
-
-            int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
-
-            img.setRGB(y, x, p);
-           }
-           */
          }
          
          //pintar posicion acutal
@@ -502,17 +536,15 @@ public class AgentController extends Agent{
            int g = 0;
            int b = 255;
            int p = (a<<24) | (r<<16) | (g<<8) | b;
-          // img.setRGB(x_actual, y_actual, p);
+
        }
        //write image
        try{
            ImageIO.write(img, "png", new File("./imagenes/test_COLOR"+"mapapruebas"+"it"+this.numeroIteraciones+".png"));
-         //f = new File("C:\\Cuarto\\Output.png");
-       //  ImageIO.write(img, "png", f);
        }catch(IOException e){
          System.out.println("Error: " + e);
        }
-    }//main() ends here
+    }
 
 
     
@@ -530,18 +562,18 @@ public class AgentController extends Agent{
         for(int i = 0; i < cerrados.size(); i++){
             //System.out.println(cerrados.get(i));
             ArrayList<AgentID> coincidencias = new ArrayList<>();
-            if(!cerradosFinal.containsKey(cerrados.get(i))){                
-                cerradosFinal.put(cerrados.get(i), coincidencias);
-                if(abiertosFinal.containsKey(cerrados.get(i))){ 
-                    abiertosFinal.remove(cerrados.get(i));
+            if(!MapaCerrados.containsKey(cerrados.get(i))){                
+                MapaCerrados.put(cerrados.get(i), coincidencias);
+                if(MapaAbiertos.containsKey(cerrados.get(i))){ 
+                    MapaAbiertos.remove(cerrados.get(i));
                 } 
             }
             else{
-                coincidencias = cerradosFinal.get(cerrados.get(i));
+                coincidencias = MapaCerrados.get(cerrados.get(i));
                 
                 if(this.numeroIteraciones == 0){
                         
-                        //coincidencias = abiertosFinal.get(abiertos.get(i));
+                        //coincidencias = MapaAbiertos.get(abiertos.get(i));
                         for(int j = 0; j < coincidencias.size(); j++){
                             AgentID aux = coincidencias.get(j);
                             if(!this.coincidencias.get(indexCoincidenciasActual).contains(aux)){
@@ -563,21 +595,21 @@ public class AgentController extends Agent{
             
             if(!coincidencias.contains(arrayVehiculos.get(turnoActual))){
                     coincidencias.add(arrayVehiculos.get(turnoActual));
-                    cerradosFinal.put(cerrados.get(i), coincidencias);
+                    MapaCerrados.put(cerrados.get(i), coincidencias);
             }
         }
         
         System.out.println(ANSI_RED + "PASA EL PRIMER FOR DE CERRADOS");
         //System.out.println(ANSI_RED+"abiertos");
         for(int i = 0; i < abiertos.size(); i++){
-            if(!cerradosFinal.containsKey(abiertos.get(i))){
+            if(!MapaCerrados.containsKey(abiertos.get(i))){
                 ArrayList<AgentID> coincidencia = new ArrayList<>();
-                if(!abiertosFinal.containsKey(abiertos.get(i))){                
-                    abiertosFinal.put(abiertos.get(i), coincidencia);
+                if(!MapaAbiertos.containsKey(abiertos.get(i))){                
+                    MapaAbiertos.put(abiertos.get(i), coincidencia);
                 }
                 else{
-                    ArrayList<AgentID> auxs = abiertosFinal.get(abiertos.get(i));
-                    //coincidencias = abiertosFinal.get(abiertos.get(i));
+                    ArrayList<AgentID> auxs = MapaAbiertos.get(abiertos.get(i));
+                    //coincidencias = MapaAbiertos.get(abiertos.get(i));
                     for(int j = 0; j < auxs.size(); j++){
                         AgentID aux = auxs.get(j);
                         if(!this.coincidencias.get(indexCoincidenciasActual).contains(aux)){
@@ -601,7 +633,7 @@ public class AgentController extends Agent{
 
                 if(!coincidencia.contains(arrayVehiculos.get(turnoActual))){
                         coincidencia.add(arrayVehiculos.get(turnoActual));
-                        abiertosFinal.put(abiertos.get(i), coincidencia);
+                        MapaAbiertos.put(abiertos.get(i), coincidencia);
                 }
             }
         }
@@ -696,11 +728,15 @@ public class AgentController extends Agent{
 
         System.out.println("OBJETIVO SENSORES: " + object.get("objetive_pos").asInt());
         if(this.objetivePos == -1){
+            
             this.objetivePos = object.get("objetive_pos").asInt();
-            this.objetivePos = 43380; ///////////////////////////////////////ASIGNA OBJETIVO MANUAL
+            
+            if(this.objetivoManualActivo)
+                this.objetivePos = this.objetivoManual; ///////////////////////////////////////ASIGNA OBJETIVO MANUAL
         }
-        else
-            System.out.println("HA ENCONTRADO EL OBJETIVO");
+        else{
+            System.out.println(ANSI_RED+"El OBJETIVO ESTA EN "+this.objetivePos);
+        }
         
        /* 
         if(object.get("objetive_pos").asInt() != -1){
@@ -794,7 +830,7 @@ public class AgentController extends Agent{
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
-        contenido = Json.object().add("world","map6");
+        contenido = Json.object().add("world",nombre_mapa);
         
         this.sendMessage(serverAgent, contenido.toString(), ACLMessage.SUBSCRIBE, "","" ,"");
         System.out.println(ANSI_RED + "Mensaje_suscripcion enviado");
