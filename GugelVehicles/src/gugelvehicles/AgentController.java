@@ -60,10 +60,10 @@ public class AgentController extends Agent{
     private static final int NEXT_ITERATION= 13;
     
     private int state;
-    private AgentCar agentCar3;
-    private AgentTruck agentTruck;
-    private AgentCar agentCar2;
-    private AgentCar agentCar1;
+    private Vehicle agentCar3;
+    private Vehicle agentTruck;
+    private Vehicle agentCar2;
+    private Vehicle agentCar1;
     private AgentID controllerAgent;
     
     ////////////////////////////////////////////
@@ -831,10 +831,10 @@ public class AgentController extends Agent{
 
     private void awakeAgents() {
         try {
-            this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
-            this.agentCar2 = new AgentCar(car2Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar1 = new AgentTruck(car1Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar2 = new AgentTruck(car2Agent,this.serverAgent,this.controllerAgent);
             this.agentTruck = new AgentTruck(truckAgent,this.serverAgent,this.controllerAgent);
-            this.agentCar3 = new AgentCar(car3Agent,this.serverAgent,this.controllerAgent);
+            this.agentCar3 = new AgentTruck(car3Agent,this.serverAgent,this.controllerAgent);
         } catch (Exception ex) {
             Logger.getLogger(AgentCar.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ANSI_RED+"Error inicializando agentes");
