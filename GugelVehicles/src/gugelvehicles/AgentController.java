@@ -30,14 +30,14 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1_14444";
-    String car2Agent_name = "car2_14444";
-    String truckAgent_name = "truck_14444";
-    String dronAgent_name = "dron_14444";
+    String car1Agent_name = "car1_144244";
+    String car2Agent_name = "car2_144442";
+    String truckAgent_name = "truck_142444";
+    String car3Agent_name = "car3_144424";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
-    AgentID dronAgent = new AgentID(this.dronAgent_name);
+    AgentID car3Agent = new AgentID(this.car3Agent_name);
     
     private boolean finish = false;
     
@@ -60,7 +60,7 @@ public class AgentController extends Agent{
     private static final int NEXT_ITERATION= 13;
     
     private int state;
-    private AgentDron agentDron;
+    private AgentCar agentCar3;
     private AgentTruck agentTruck;
     private AgentCar agentCar2;
     private AgentCar agentCar1;
@@ -100,7 +100,7 @@ public class AgentController extends Agent{
         this.arrayVehiculos.add(this.car1Agent);
         this.arrayVehiculos.add(this.car2Agent);
         this.arrayVehiculos.add(this.truckAgent);
-        this.arrayVehiculos.add(this.dronAgent);
+        this.arrayVehiculos.add(this.car3Agent);
         
         ArrayList<AgentID> coincidencias_vehiculo1 = new ArrayList<>();
         coincidencias_vehiculo1.add(this.car1Agent);
@@ -115,7 +115,7 @@ public class AgentController extends Agent{
         this.coincidencias.add(coincidencias_vehiculo3);
         
         ArrayList<AgentID> coincidencias_vehiculo4 = new ArrayList<>();
-        coincidencias_vehiculo4.add(this.dronAgent);
+        coincidencias_vehiculo4.add(this.car3Agent);
         this.coincidencias.add(coincidencias_vehiculo4);
         
         this.vehiclesPositions.add(new MapPoint(0,0));
@@ -694,10 +694,10 @@ public class AgentController extends Agent{
         MapPoint pos = new MapPoint(posicionVehiculoX,posicionVehiculoY);
         System.out.println(ANSI_RED+turnoActual);
 
-        
+        System.out.println("OBJETIVO SENSORES: " + object.get("objetive_pos").asInt());
         if(this.objetivePos == -1){
             this.objetivePos = object.get("objetive_pos").asInt();
-            this.objetivePos = 8752; ///////////////////////////////////////ASIGNA OBJETIVO MANUAL
+            this.objetivePos = 43380; ///////////////////////////////////////ASIGNA OBJETIVO MANUAL
         }
         else
             System.out.println("HA ENCONTRADO EL OBJETIVO");
@@ -794,7 +794,7 @@ public class AgentController extends Agent{
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
-        contenido = Json.object().add("world","map5");
+        contenido = Json.object().add("world","map6");
         
         this.sendMessage(serverAgent, contenido.toString(), ACLMessage.SUBSCRIBE, "","" ,"");
         System.out.println(ANSI_RED + "Mensaje_suscripcion enviado");
@@ -834,7 +834,7 @@ public class AgentController extends Agent{
             this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
             this.agentCar2 = new AgentCar(car2Agent,this.serverAgent,this.controllerAgent);
             this.agentTruck = new AgentTruck(truckAgent,this.serverAgent,this.controllerAgent);
-            this.agentDron = new AgentDron(dronAgent,this.serverAgent,this.controllerAgent);
+            this.agentCar3 = new AgentCar(car3Agent,this.serverAgent,this.controllerAgent);
         } catch (Exception ex) {
             Logger.getLogger(AgentCar.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ANSI_RED+"Error inicializando agentes");
@@ -842,7 +842,7 @@ public class AgentController extends Agent{
         this.agentCar1.start();
         this.agentCar2.start();
         this.agentTruck.start();
-        this.agentDron.start();
+        this.agentCar3.start();
         
         state = SUSCRIBE;
         
@@ -856,7 +856,7 @@ public class AgentController extends Agent{
         this.sendMessage(this.car1Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"" ,this.car1Agent_name+"_checkin");
         this.sendMessage(this.car2Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"" ,this.car2Agent_name+"_checkin");
         this.sendMessage(this.truckAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"" ,this.truckAgent_name+"_checkin");
-        this.sendMessage(this.dronAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"",this.dronAgent_name+ "_checkin");
+        this.sendMessage(this.car3Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"",this.car3Agent_name+ "_checkin");
         
         //state=WAIT_CHECKIN;
         state = WAIT_CHECKIN;
@@ -902,7 +902,7 @@ public class AgentController extends Agent{
             this.sendMessage(this.car1Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.car1Agent_name+"_ejec");
             this.sendMessage(this.car2Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"",this.car2Agent_name+"_ejec");
             this.sendMessage(this.truckAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.truckAgent_name+"_ejec");
-            this.sendMessage(this.dronAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"", this.dronAgent_name+"_ejec");
+            this.sendMessage(this.car3Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"", this.car3Agent_name+"_ejec");
             
             this.state = WAIT_IDLE;
         }else{
@@ -912,7 +912,7 @@ public class AgentController extends Agent{
             this.sendMessage(this.car1Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.car1Agent_name+"_checkin");
             this.sendMessage(this.car2Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID,"",this.car2Agent_name+"_checkin");
             this.sendMessage(this.truckAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.truckAgent_name+"_checkin");
-            this.sendMessage(this.dronAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.dronAgent_name+"_checkin");
+            this.sendMessage(this.car3Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "",this.car3Agent_name+"_checkin");
            // this.sendMessage(this.car1Agent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "","car1_checkin");
            // this.sendMessage(this.truckAgent, contenido.toString(), ACLMessage.REQUEST, this.conversationID, "","truck_checkin");
          
