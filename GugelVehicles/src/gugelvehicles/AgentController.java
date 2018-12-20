@@ -30,10 +30,10 @@ import java.util.Map;
 public class AgentController extends Agent{
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1_1";
-    String car2Agent_name = "car2_1";
-    String truckAgent_name = "truck_1";
-    String dronAgent_name = "dron_1";
+    String car1Agent_name = "car1_14444";
+    String car2Agent_name = "car2_14444";
+    String truckAgent_name = "truck_14444";
+    String dronAgent_name = "dron_14444";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -93,6 +93,7 @@ public class AgentController extends Agent{
     private static int tamanio_mapa = 510;
     private  static int m = tamanio_mapa;
     private  static int n = tamanio_mapa;
+    private boolean goal;
     
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
@@ -285,7 +286,7 @@ public class AgentController extends Agent{
     
     private void selectPosition(){
         System.out.println(ANSI_RED + "seleccionando posición");
-        if(!this.IsOnObjetive()){
+        if(!this.IsOnObjetive() && !this.goal){
             System.out.println(ANSI_RED + "No esta en el objetivo");
             Objetivo proxObj = new Objetivo();
 
@@ -402,11 +403,12 @@ public class AgentController extends Agent{
         }
         
         System.out.println("\n\n\n\n" + ANSI_RED + "**********************************************************************\n\n\n\n");
+        if(this.arrayVehiculos.size()!= 0)
         System.out.println(ANSI_RED + "********TURNO DE " + this.arrayVehiculos.get(turnoActual).getLocalName() +"\"********\n\n\n\n");
         System.out.println(ANSI_RED + "**********************************************************************\n\n\n\n");
         this.receiveMessage(); // fin de turno
         
-        vehiclesPositions.set(turnoActual, nextObj);  // MAL
+        vehiclesPositions.set(turnoActual, nextObj);  
         
         if(this.arrayVehiculos.size() == 0)
             this.state = FINISH;
@@ -427,13 +429,13 @@ public class AgentController extends Agent{
            //Pintar mapa blanco y negro
          for(int x = 0; x < width; x++){
            int a = 255; //alpha
-           int r = 255;
-           int g = 255;
-           int b = 255;
+           int r = 0;
+           int g = 0;
+           int b = 0;
 
            int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
 
-           img.setRGB(y, x, p);
+           img.setRGB(x, y, p);
          }
        }
        
@@ -450,7 +452,7 @@ public class AgentController extends Agent{
 
                  int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
 
-                 img.setRGB(y, x, p);
+                 img.setRGB(x, y, p);
                 }
                 
             if(cerradosFinal.containsKey(y*width+x)){
@@ -461,7 +463,7 @@ public class AgentController extends Agent{
 
                  int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
 
-                 img.setRGB(y, x, p);
+                 img.setRGB(x, y, p);
                 }
             
                 if((mapa.get(y*width+x) == 1) || (mapa.get(y*width+x) == -1) || (mapa.get(y*width+x) == 2) || (mapa.get(y*width+x) == 3)){
@@ -472,7 +474,7 @@ public class AgentController extends Agent{
 
                     int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
 
-                    img.setRGB(y, x, p);
+                    img.setRGB(x, y, p);
                 }
             }
         }
@@ -660,6 +662,9 @@ public class AgentController extends Agent{
         JsonObject object = Json.parse(contenido).asObject();
         System.out.println(ANSI_RED+contenido);
         JsonArray abiertosJson = object.get("abiertos").asArray();
+        
+        this.goal = object.get("goal").asBoolean();
+        
        // ArrayList<Integer> abiertosInt = new ArrayList<>();
         
         for(int i = 0; i < abiertosJson.size(); i++){
@@ -690,8 +695,10 @@ public class AgentController extends Agent{
         System.out.println(ANSI_RED+turnoActual);
 
         
-        if(this.objetivePos == -1)
+        if(this.objetivePos == -1){
             this.objetivePos = object.get("objetive_pos").asInt();
+            this.objetivePos = 8752; ///////////////////////////////////////ASIGNA OBJETIVO MANUAL
+        }
         else
             System.out.println("HA ENCONTRADO EL OBJETIVO");
         
@@ -787,7 +794,7 @@ public class AgentController extends Agent{
     public void suscribe(){
         
         JsonObject contenido = new JsonObject(); 
-        contenido = Json.object().add("world","map2");
+        contenido = Json.object().add("world","map5");
         
         this.sendMessage(serverAgent, contenido.toString(), ACLMessage.SUBSCRIBE, "","" ,"");
         System.out.println(ANSI_RED + "Mensaje_suscripcion enviado");

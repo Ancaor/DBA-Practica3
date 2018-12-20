@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * Define funciones para el envio y recepción de mensajes
  * entre agentes.
  */
-public class Agent extends SuperAgent{
+public class Agent extends SingleAgent{
     
     public static final String ANSI_RESET = "\033[30m";
     public static final String ANSI_RED = "\033[31m";

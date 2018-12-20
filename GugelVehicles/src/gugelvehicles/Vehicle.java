@@ -15,9 +15,12 @@ import static gugelvehicles.Agent.ANSI_BLUE;
 import java.util.ArrayList;
 
 /**
- *
- * @author Anton
- */
+    * Superclase define los Vehiculos y su comportamiento
+    * 
+    * 
+    * @author Antonio José Camarero Ortega
+    */
+
 public class Vehicle extends Agent{
     
     protected boolean finish = false;
@@ -37,12 +40,10 @@ public class Vehicle extends Agent{
     protected VehicleType vehicleType;
     
     protected String vehicleTypeName;
-    
-    protected String ANSI;
-    
+
     //////////////////////////////
     
-    
+    protected String ANSI;
     
     //
     protected int battery;
@@ -55,6 +56,7 @@ public class Vehicle extends Agent{
     protected String reply_with_controller;
     protected String reply_with_server;
     
+    
     protected static final int UMBRAL_BATERIA = 70;
     
     
@@ -65,7 +67,7 @@ public class Vehicle extends Agent{
     protected static final int SEND_COMMAND_TO_SERVER = 4;
     protected static final int FINISH = 5;
     protected static final int  WAIT_TURN = 6;
-   // private static final int SEND_COMMAND = 6;
+
     protected String conversationID;
     protected int enery;
     protected boolean goal;
@@ -85,6 +87,18 @@ public class Vehicle extends Agent{
         state = WAIT_CONTROLLER;
     }
     
+    /**
+    * Estado en el que el vehiculo espera a que el controlador le indique acciones:
+    * 
+    *   - Si recibe un REQUEST checkin : El vehiculo manda el comando de chekin al server y pasa al estado WAIR_SERVER_CHEKIN.
+    *   - Si recibe un REQUEST start : El vehiculo puede empezar a moverse por lo que pasa a esperar su turno(WAIT_TURN).
+    *   - Si recibe un REQUEST reset : El vehiculo debe resetearse por lo que vuelve a esperar un mensaje del controlador.
+    * 
+    * 
+    * @author Antonio José Camarero Ortega
+    */
+    
+    
     private void wait_controller() {
         
         ArrayList<String> message = this.receiveMessage();
@@ -94,7 +108,6 @@ public class Vehicle extends Agent{
         this.reply_with_controller = message.get(2);
         String content = message.get(3);
         String in_reply_to = message.get(4);
-       // System.out.println(reply_with_controller);
         System.out.println(performativa);
         System.out.println(content);
         System.out.println(conversationID);
@@ -121,6 +134,17 @@ public class Vehicle extends Agent{
         
         
     }
+    
+    /**
+    * Espera la respuesta del chekin del servidor
+    * 
+    * Una vez respondido analiza las Capabilities y las compara con las capabilities esperadas segun su tipo de vehiculo:
+    * 
+    *   - Si cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:ok y pasa al estado WAIT_CONTROLLER.
+    *   - Si NO cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:error y pasa al estado WAIT_CONTROLLER.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
     
     private void wait_server_chekin() {
         
@@ -163,16 +187,21 @@ public class Vehicle extends Agent{
                 this.sendMessage(this.controllerAgent, contenido.toString(), ACLMessage.INFORM, conversationID , this.reply_with_controller,"");
             }
             
-            
-            //contenido = Json.object().add("command","checkin");
-            
-            //this.sendMessage(this.serverAgent, contenido.toString(), ACLMessage.REQUEST, conv_id, reply_with);
-            
-            
             state=WAIT_CONTROLLER;
         }
         
     }
+    
+    /**
+    * Finaliza la ejecución del vehiculo
+    * 
+    * Una vez respondido analiza las Capabilities y las compara con las capabilities esperadas segun su tipo de vehiculo:
+    * 
+    *   - Si cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:ok y pasa al estado WAIT_CONTROLLER.
+    *   - Si NO cohinciden con su tipo de vehiculo : Manda al controller el mensaje de vehicle:error y pasa al estado WAIT_CONTROLLER.
+    * 
+    * @author Antonio José Camarero Ortega
+    */
 
     private void finish() {
         JsonObject message = Json.object();
@@ -240,6 +269,7 @@ public class Vehicle extends Agent{
         this.x = result.get("x").asInt()+5;
         this.y = result.get("y").asInt()+5;
         this.position = this.x + (this.y * 510);
+        this.goal = result.get("goal").asBoolean();
         System.out.println("x " + this.x + " y "+ this.y);
         JsonArray aux = result.get("sensor").asArray();
         
@@ -292,6 +322,7 @@ public class Vehicle extends Agent{
         information_package.add("cerrados", this.convertToJson(cerrados));
         information_package.add("pos", this.position );
         information_package.add("objetive_pos", pos_objetivo);
+        information_package.add("goal", this.goal);
         System.out.println(information_package.toString());
         System.out.println("-----POSICION VEHICULO: x:" + position%510 + " y:" + position/510);
         this.state = WAIT_CONTROLLER_COMMAND;
