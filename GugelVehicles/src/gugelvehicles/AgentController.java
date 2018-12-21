@@ -36,18 +36,18 @@ public class AgentController extends Agent{
      
      
     String nombre_mapa = "map10";                           //  Elección del mapa
-    boolean objetivoManualActivo = false;                   //  Actica el modo manual para asignar un objetivo de forma manual
-    int objetivoManual = 130305;                            //  Elige la casilla a la que se van a dirigir los vehiculos en modo manual.
+    boolean objetivoManualActivo = true;                   //  Actica el modo manual para asignar un objetivo de forma manual
+    int objetivoManual = 29321;                            //  Elige la casilla a la que se van a dirigir los vehiculos en modo manual.
     boolean modoExploracion = false;
      
     int tamanio_real_mapa; 
      
     
     private AgentID serverAgent;
-    String car1Agent_name = "car1_1444244444444";
-    String car2Agent_name = "car2_1444442444444";
-    String truckAgent_name = "truck_1442444444444";
-    String car3Agent_name = "car3_1444424444444";
+    String car1Agent_name = "car1_144421444144444";
+    String car2Agent_name = "car2_144444124414444";
+    String truckAgent_name = "truck_144241444144444";
+    String car3Agent_name = "car3_144442441444144";
     AgentID car1Agent = new AgentID(this.car1Agent_name);
     AgentID car2Agent = new AgentID(this.car2Agent_name);
     AgentID truckAgent = new AgentID(this.truckAgent_name);
@@ -403,10 +403,16 @@ public class AgentController extends Agent{
 
             for(Map.Entry<Integer, ArrayList<AgentID>> entry : MapaAbiertos.entrySet()){
                System.out.print(ANSI_RED + "Entrada de abiertos: " + entry.getValue());
+               if(!fly){
                for(int i = 0; i < coincidencias_actual.size(); i++){
                     if(entry.getValue().contains(coincidencias_actual.get(i))){                    
                         abi.add(entry.getKey());
                     }
+               }
+               }else{
+                   if(entry.getValue().contains(coincidencias_actual.get(0))){
+                       abi.add(entry.getKey());
+                   }
                }
             }
             

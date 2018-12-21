@@ -29,10 +29,9 @@ En la clase AgentController
                     mapa 7 : 3117     
                     mapa 8 : 22994     
                     mapa 9 : 31167     
-                    mapa 10:
+                    mapa 10: 29321
 
 (El paso 4 es el que no pudo automatizarse por falta de tiempo con el servidor para hacer las pruebas necesarias)
-(El mapa 10 no tiene posición de objetivo debido a falta de tiempo para explorar dicho mapa)
 
 5º) Ejecutar
 
