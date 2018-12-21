@@ -1,0 +1,59 @@
+
+IMPORTANTE
+
+Debido a problemas con la disponibilidad del servidor no se ha podido automatizar el proceso de busqueda de posición del objetivo almacenado por falta de tiempo.
+
+
+----------------------------------------------------------
+
+
+MODO - IR AL OBJETIVO -
+
+Debido a esto si se desea lanzar el ejercito de drones para que vayan al objetivo de un mapa determinado hay que realizar lo siguiente:
+
+
+
+En la clase AgentController
+
+1º) Poner la variable "modoExploracion" a false.
+2º) Poner la variable "objetivoManualActivo" a true.
+3º) Indicar el mapa en la variable "nombre_mapa".
+4º) En función del mapa asignar el valor de la variable "objetivoManual" con uno de estos valores (el entero a la derecha de cada mapa):
+
+                    mapa 1 : 28101     
+                    mapa 2 : 24537      
+                    mapa 3 : 51052     
+                    mapa 4 : 26582     
+                    mapa 5 : 9264      
+                    mapa 6 : 26616    
+                    mapa 7 : 3117     
+                    mapa 8 : 22994     
+                    mapa 9 : 31167     
+                    mapa 10:
+
+(El paso 4 es el que no pudo automatizarse por falta de tiempo con el servidor para hacer las pruebas necesarias)
+(El mapa 10 no tiene posición de objetivo debido a falta de tiempo para explorar dicho mapa)
+
+5º) Ejecutar
+
+----------------------------------------------------------
+
+
+
+
+----------------------------------------------------------
+
+MODO - EXPLORAR MAPA -
+
+1º) Poner la variable "modoExploracion" a true.
+2º) Poner la variable "objetivoManualActivo" a false.
+3º) Indicar el mapa en la variable "nombre_mapa".
+4º) Ejecutar
+
+(Si se encontrase el objetivo en la exploración deberia obtenerse la posición del objetivo de manera manual y añadirla a la lista de arriba)
+
+------------------------------------------------------------
+
+
+Sentimos tener esta solución "demasiado" manual, la idea era almacenar mapas en ficheros y leerlos pero debido a problemas de tiempo no hemos podido
+llevarlo a cabo.
