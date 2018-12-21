@@ -38,6 +38,7 @@ public class AgentController extends Agent{
     String nombre_mapa = "map10";                           //  Elección del mapa
     boolean objetivoManualActivo = false;                   //  Actica el modo manual para asignar un objetivo de forma manual
     int objetivoManual = 130305;                            //  Elige la casilla a la que se van a dirigir los vehiculos en modo manual.
+    boolean modoExploracion = false;
      
     int tamanio_real_mapa; 
      
@@ -926,10 +927,18 @@ public class AgentController extends Agent{
 
     private void awakeAgents() {
         try {
-            this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
-            this.agentCar2 = new AgentCar(car2Agent,this.serverAgent,this.controllerAgent);
-            this.agentTruck = new AgentCar(truckAgent,this.serverAgent,this.controllerAgent);
-            this.agentCar3 = new AgentCar(car3Agent,this.serverAgent,this.controllerAgent);
+            if(this.modoExploracion){
+                this.agentCar1 = new AgentCar(car1Agent,this.serverAgent,this.controllerAgent);
+                this.agentCar2 = new AgentCar(car2Agent,this.serverAgent,this.controllerAgent);
+                this.agentTruck = new AgentCar(truckAgent,this.serverAgent,this.controllerAgent);
+                this.agentCar3 = new AgentCar(car3Agent,this.serverAgent,this.controllerAgent);
+            }else{
+                this.agentCar1 = new AgentDron(car1Agent,this.serverAgent,this.controllerAgent);
+                this.agentCar2 = new AgentDron(car2Agent,this.serverAgent,this.controllerAgent);
+                this.agentTruck = new AgentDron(truckAgent,this.serverAgent,this.controllerAgent);
+                this.agentCar3 = new AgentDron(car3Agent,this.serverAgent,this.controllerAgent);
+            }
+            
         } catch (Exception ex) {
             Logger.getLogger(AgentCar.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ANSI_RED+"Error inicializando agentes");
