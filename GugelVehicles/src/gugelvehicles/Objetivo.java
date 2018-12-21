@@ -28,8 +28,10 @@ import ThetaStar.*;
 import java.util.Random;
 
 /**
+ * Clase dedicada a la busqueda del siguiente objetivo que el controlador asignará a un vehiculo
  *
  * @author Ruben
+ * @author Pablo García Llorente
  */
 public class Objetivo {
     private static int vision = 3;
@@ -47,8 +49,6 @@ public class Objetivo {
     private static int n_real=510;
     
     
-    private static int x_objetivo;
-    private static int y_objetivo;
     private static final String MAPA = "map11";
     private static ArrayList<Integer> map_visto = new ArrayList<>();
     private static ArrayList<Integer> map_real = new ArrayList<>();
@@ -57,7 +57,12 @@ public class Objetivo {
     private static ArrayList<MapPoint> cerrados = new ArrayList<>();
     private static ArrayList<MapPoint> traza = new ArrayList<>();
    
-     
+/**
+ *Función que busca la casilla, dentro de el vector abiertos, más cercana al vehículo
+ * 
+ * @author Ruben
+ * @author Pablo García Llorente
+ */
        
     public static MapPoint abiertoMasCercano(){
    
@@ -90,7 +95,12 @@ public class Objetivo {
         //return abiertos.get(index);
         return pMasCercano;
     }
-    
+/**
+ *Función que busca la casilla, dentro de el vector abiertos, más cercana a la meta
+ * 
+ * @author Ruben Mógica Garrido
+ * @author Pablo García Llorente
+ */  
     public static MapPoint abiertoMasCercanoFin(){
 
         MapPoint pMasCercano = abiertos.get(0);
@@ -122,7 +132,11 @@ public class Objetivo {
         int yValue = (p1.y-p2.y)*(p1.y-p2.y);
         return Math.sqrt(xValue+yValue);
     } 
-    
+/**
+ *Función que imprime en un documento el mapa
+ * 
+ * @author Ruben Mógica Garrido
+ */   
     
     public static void PrintMapImage(){
         
@@ -157,6 +171,13 @@ public class Objetivo {
         
     }
     
+    
+    /**
+    *Función que imprime en un documento el mapa a color
+    * 
+    * @author Ruben Mógica Garrido
+    * @author Pablo García Llorente
+    */
     public static void DrawColor(){
        //image dimension
        int width = m_real;
@@ -253,6 +274,11 @@ public class Objetivo {
        }
     }//main() ends here
 
+    /**
+    *Función que imprime en un documento la traza de los vehiculos a color
+    * 
+    * @author Ruben Mógica Garrido
+    */
     
     public static void DrawTraza(){
        //image dimension
@@ -328,6 +354,11 @@ public class Objetivo {
          System.out.println("Error: " + e);
        }
     }
+    /**
+    *Función que transforma un entero
+    * 
+    * @author Pablo García Llorente
+    */
     
     public MapPoint iniciarMapPoint(int a){
         int x = a%510;
@@ -335,7 +366,12 @@ public class Objetivo {
         MapPoint resultado = new MapPoint(x,y);
         return resultado;
     }
-    
+    /**
+    *Función que muestra el mapa por pantalla en forma de números
+    * 
+    * @author Pablo García Llorente
+    * @author Ruben Mógica Garrido
+    */
     public static void printMap(ArrayList<Integer> map, ArrayList<Integer> abiert){
         System.out.println(" ");
         for(int j = 0; j < 110; j++){
@@ -383,7 +419,14 @@ public class Objetivo {
         */
     
     }
-    
+    /**
+    *Función que recibe toda la información necesaria para trabajar del controlador y devuelve 
+    * un punto del mapa adyacente a la posición del vehículo que está en el camino más corto hacia
+    * la casilla de aiertos más cercana al vehículo. Esta función solo se utiliza en el caso de que
+    * el vehículo en cuestión sea un dron, en caso contrario se utiliza nextPosition.
+    * 
+    * @author Ruben Mógica Garrido
+    */
     public MapPoint nextDron(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie){
         x_actual = actual_x;
         y_actual = actual_y;
@@ -395,6 +438,14 @@ public class Objetivo {
         pFin = iniciarMapPoint(objetivo);
         return abiertoMasCercanoFin();
     }
+    /**
+    *Función que recibe toda la información necesaria para trabajar del controlador y devuelve 
+    * un punto del mapa adyacente a la posición del vehículo que está en el camino más corto hacia
+    * la casilla de aiertos más cercana al vehículo.
+    * 
+    * @author Pablo García Llorente
+    * @author Ruben Mógica Garrido
+    */
     
     public MapPoint nextPosition(int actual_x,int actual_y, int objetivo, ArrayList<Integer> abie,
             ArrayList<Integer> mapa, ArrayList<MapPoint> vehiclePosition) {
