@@ -115,6 +115,7 @@ public class AgentController extends Agent{
      * 
      * @author Rubén Marín Asunción 
      * @author Antonio José Camarero Orteg
+     * 
      */
     public AgentController(AgentID aid, AgentID server_id) throws Exception {
         super(aid);
@@ -229,6 +230,7 @@ public class AgentController extends Agent{
      * @return MapPoint con los valores x e y correspondientes.
      * 
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     public MapPoint iniciarMapPoint(int a){
         int x = a%tamanio_mapa;
@@ -275,6 +277,7 @@ public class AgentController extends Agent{
      * @return Double con la distancia entre los dos MapPoint
      * 
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     public double distance(MapPoint p1, MapPoint p2){
         int xValue = (p1.x-p2.x)*(p1.x-p2.x);
@@ -373,6 +376,7 @@ public class AgentController extends Agent{
      * de vehiculos ya que su ejecución ha finalizado.
      * 
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     private void selectPosition(){
         System.out.println(ANSI_RED + "seleccionando posición");
@@ -608,6 +612,7 @@ public class AgentController extends Agent{
      * obtenidos por los vehiculos.
      * 
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     private void updateInfo(){
         System.out.println(ANSI_RED+"esta en update info");
@@ -743,6 +748,7 @@ public class AgentController extends Agent{
     /**
      * Función que recibe la información de un coche y la almacena en variables
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     private void requestInfo(){
         abiertos.clear();
@@ -820,6 +826,7 @@ public class AgentController extends Agent{
     /**
      * Función que da paso al vehiculo que tenga el turno.
      * @author Rubén Marín Asunción
+     * @author Pablo García Llorente
      */
     private void waitIdle(){
 
@@ -1068,6 +1075,7 @@ public class AgentController extends Agent{
      * 
      * @author Rubén Marín Asunción
      * @author Antonio José Camarero Ortega
+     * @author Pablo García Llorente
      */
 
      @Override
